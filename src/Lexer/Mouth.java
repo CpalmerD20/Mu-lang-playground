@@ -1,3 +1,6 @@
+package Lexer;
+
+import Expressions.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,9 +9,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 
-public class Compiler {
+public class Mouth {
     static boolean hadError = false;
-    public Compiler(String[] arguments) throws IOException {
+    public Mouth(String[] arguments) throws IOException {
         if (arguments.length > 1) {
             System.out.println("Using: jlox [script]");
             System.exit(64);

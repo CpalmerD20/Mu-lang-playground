@@ -1,4 +1,6 @@
-enum Types {
+package Lexer;
+
+public enum Types {
     // Literals.
     IDENTIFIER, STRING, FLOAT,
     // Single-character tokens.

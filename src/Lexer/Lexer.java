@@ -1,9 +1,12 @@
+package Lexer;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import Expressions.Token;
 
-class Lexer {
+public class Lexer {
     private final String source;
     private final List<Token> tokens = new ArrayList<>();
     private int start = 0;
@@ -11,7 +14,7 @@ class Lexer {
     private int line = 1;
 
 
-    private static final Map<String,Types> keywords;
+    private static final Map<String, Types> keywords;
     static {
         keywords = new HashMap<>();
         keywords.put("true", Types.TRUE);
@@ -32,7 +35,7 @@ class Lexer {
     }
 
 
-    Lexer(String source) {
+    public Lexer(String source) {
         this.source = source;
     }
 
@@ -106,7 +109,7 @@ class Lexer {
         if (type == null) type = Types.IDENTIFIER;
         addToken(type);
     }
-    private void scanToken() {
+    void scanToken() {
         char glyph = advance();
     //TODO space shows as unexpected character
         switch (glyph) {
@@ -147,13 +150,13 @@ class Lexer {
             case '+' -> addToken(Types.PLUS);
             case ';' -> addToken(Types.SEMICOLON);
             case '/' -> addToken(advanceIf('>') ? Types.RIGHT_DO : Types.SLASH);
-            case '*' -> addToken(advanceIf('&') ? Types.RIGHT_NOTE :Types.STAR);
+            case '*' -> addToken(advanceIf('&') ? Types.RIGHT_NOTE : Types.STAR);
             case '&' -> addToken(advanceIf('*') ? Types.LEFT_NOTE : Types.BIT_AND);
             case '!' -> addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
             case '=' -> addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
             case '>' -> addToken(advanceIf('=') ? Types.GREATER_EQUAL : Types.GREATER);
             case '<' -> addToken(advanceIf('=') ? Types.LESS_EQUAL : Types.LESS);
-            default -> Compiler.error(line, "unexpected character");
+            default -> Mouth.error(line, "unexpected character");
         }
 
     }
@@ -166,14 +169,14 @@ class Lexer {
             }
         }
         if (isAtEnd()) {
-            Compiler.error(line, "unterminated string");
+            Mouth.error(line, "unterminated string");
             return;
         }
         advance();
         String value = source.substring(start + 1, current - 1);
         addToken(Types.STRING, value);
     }
-    List<Token> scanTokens() {
+    public List<Token> scanTokens() {
         while (!isAtEnd()) {
             start = current;
             scanToken();
