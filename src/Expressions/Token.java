@@ -1,10 +1,12 @@
-class Token {
-    final Types type;
+package Expressions;
+import Lexer.Types;
+public class Token {
+    public final Types type;
     final String lexeme;
     final Object literal;
     final int line;
 
-    Token(Types type, String lexeme, Object literal, int line) {
+    public Token(Types type, String lexeme, Object literal, int line) {
         this.type = type;
         this.lexeme = lexeme;
         this.literal = literal;
