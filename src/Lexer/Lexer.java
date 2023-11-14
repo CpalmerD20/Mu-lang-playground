@@ -13,10 +13,10 @@ public class Lexer {
     private int current = 0;
     private int line = 1;
 
-
     private static final Map<String, Types> keywords;
     static {
         keywords = new HashMap<>();
+        keywords.put("fn", Types.LEFT_DO);
         keywords.put("true", Types.TRUE);
         keywords.put("false", Types.FALSE);
         keywords.put("and", Types.AND);
@@ -34,11 +34,9 @@ public class Lexer {
         keywords.put("print", Types.PRINT);
     }
 
-
     public Lexer(String source) {
         this.source = source;
     }
-
     private boolean isAtEnd() {
         return current >= source.length();
     }
@@ -111,35 +109,14 @@ public class Lexer {
     }
     void scanToken() {
         char glyph = advance();
-    //TODO space shows as unexpected character
+
+        //TODO find out what is wrong with string
         switch (glyph) {
-            case ' ': break;
-            case '\r': break;
-            case '\t': break;
-            case '\n': {
-                line += 1;
-                break;
-            }
-            case 'f': if (peek() == '/') {
-                advance();
-                addToken(Types.LEFT_DO);
-            } else {
-                identifier();
-            }
-            case '"': {
-                string();
-                break;
-            }
-            //TODO string breaks the lexer
-            default: {
-                if (isDigit(glyph)) {
-                    number();
-                } else if (isAlpha(glyph)) {
-                    identifier();
-                }
-            }
-        }
-        switch (glyph) {
+            case ' ' -> System.out.print("");
+            case '\r' -> System.out.print(" r ");
+            case '\t' -> System.out.print(" t ");
+            case '\n' -> line += 1;
+            case '"' -> string();
             case '(' -> addToken(Types.LEFT_PAREN);
             case ')' -> addToken(Types.RIGHT_PAREN);
             case '{' -> addToken(Types.LEFT_BRACE);
@@ -156,7 +133,15 @@ public class Lexer {
             case '=' -> addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
             case '>' -> addToken(advanceIf('=') ? Types.GREATER_EQUAL : Types.GREATER);
             case '<' -> addToken(advanceIf('=') ? Types.LESS_EQUAL : Types.LESS);
-            default -> Mouth.error(line, "unexpected character");
+            default -> {
+                if (isDigit(glyph)) {
+                    number();
+                } else if (isAlpha(glyph)) {
+                    identifier();
+                } else {
+                    Mouth.error(line, "unexpected character");
+                }
+            }
         }
 
     }

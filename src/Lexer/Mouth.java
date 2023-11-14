@@ -24,13 +24,21 @@ public class Mouth {
 
     static void run(String line) {
         hadError = false;
-        Lexer scanner = new Lexer(line);
-        List<Token> tokens = scanner.scanTokens();
+        Lexer reader = new Lexer(line);
+        List<Token> tokens = reader.scanTokens();
 
-        // For now, just print the tokens.
+//          use to print basic tokens
         for (Token token : tokens) {
             System.out.println(token);
         }
+        //TODO REMOVE THE FOR LOOP
+
+        Parser parser = new Parser(tokens);
+        Expression expression = Parser.parse();
+        if (hadError) {
+            return;
+        }
+        System.out.println(new TreePrinter().print(expression));
     }
     void runPrompt() throws IOException {
         InputStreamReader input = new InputStreamReader(System.in);
@@ -44,7 +52,7 @@ public class Mouth {
             hadError = false;
         }
     }
-    private static void runFile(String path) throws IOException {
+    static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
 //        run(line);
         if (hadError) System.exit(65);
@@ -53,8 +61,12 @@ public class Mouth {
         report(line, "", message);
     }
 
-    private static void report(int line, String where, String message) {
+    static void report(int line, String where, String message) {
         System.err.println("[line " + line + "] Error" + where + ": " + message);
+        hadError = true;
+    }
+    static void reportToken(Token token, String where, String message) {
+        System.err.println("[Token: " + token + "] Error" + where + ": " + message);
         hadError = true;
     }
 }
