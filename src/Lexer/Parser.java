@@ -100,9 +100,9 @@ public class Parser {
         if (match(Types.FLOAT, Types.STRING)) {
             return new Literal(previous().literal);
         }
-        if (match(Types.LEFT_PAREN)) {
+        if (match(Types.L_PAREN)) {
             Expression e = expression();
-            consume(Types.RIGHT_PAREN, "expect ')' after expression");
+            consume(Types.R_PAREN, "expect ')' after expression");
             return new Grouping(e);
         }
         throw shoutError(peek(), "Expect Expression");

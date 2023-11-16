@@ -16,22 +16,28 @@ public class Lexer {
     private static final Map<String, Types> keywords;
     static {
         keywords = new HashMap<>();
-        keywords.put("fn", Types.LEFT_DO);
+        keywords.put("each", Types.LAMBDA_IN);
         keywords.put("true", Types.TRUE);
         keywords.put("false", Types.FALSE);
+        keywords.put("join", Types.JOIN);
+        keywords.put("match", Types.MATCH);
         keywords.put("and", Types.AND);
         keywords.put("or", Types.OR);
         keywords.put("if", Types.IF);
         keywords.put("else", Types.ELSE);
         keywords.put("void", Types.VOID);
         keywords.put("repeat", Types.REPEAT);
+        keywords.put("until", Types.UNTIL);
         keywords.put("skip", Types.SKIP);
         keywords.put("stop", Types.STOP);
         keywords.put("return", Types.RETURN);
-        keywords.put("var", Types.DATA);
+        keywords.put("let", Types.VARIABLE);
         keywords.put("model", Types.MODEL);
-        keywords.put("this", Types.THIS);
+        keywords.put("self", Types.SELF);
         keywords.put("print", Types.PRINT);
+        keywords.put("define", Types.CLOSURE);
+        keywords.put("as", Types.AS);
+        keywords.put("is", Types.IS);
     }
 
     public Lexer(String source) {
@@ -112,23 +118,29 @@ public class Lexer {
 
         //TODO find out what is wrong with string
         switch (glyph) {
+            case '"' -> string();
             case ' ' -> System.out.print("");
             case '\r' -> System.out.print(" r ");
             case '\t' -> System.out.print(" t ");
             case '\n' -> line += 1;
-            case '"' -> string();
-            case '(' -> addToken(Types.LEFT_PAREN);
-            case ')' -> addToken(Types.RIGHT_PAREN);
-            case '{' -> addToken(Types.LEFT_BRACE);
-            case '}' -> addToken(Types.RIGHT_BRACE);
+            case '(' -> addToken(Types.L_PAREN);
+            case ')' -> addToken(Types.R_PAREN);
+            case '{' -> addToken(Types.L_CURLY);
+            case '}' -> addToken(Types.R_CURLY);
+            case '[' -> addToken(Types.L_BRACE);
+            case ']' -> addToken(Types.R_BRACE);
             case ',' -> addToken(Types.COMMA);
             case '.' -> addToken(Types.DOT);
             case '-' -> addToken(Types.MINUS);
             case '+' -> addToken(Types.PLUS);
+            case '%' -> addToken(Types.MODULO);
+            case ':' -> addToken(Types.COLON);
             case ';' -> addToken(Types.SEMICOLON);
-            case '/' -> addToken(advanceIf('>') ? Types.RIGHT_DO : Types.SLASH);
-            case '*' -> addToken(advanceIf('&') ? Types.RIGHT_NOTE : Types.STAR);
-            case '&' -> addToken(advanceIf('*') ? Types.LEFT_NOTE : Types.BIT_AND);
+            case '#' -> addToken(Types.DATA);
+            case '/' -> addToken(advanceIf('>') ? Types.LAMBDA_OUT : Types.SLASH);
+            case '*' -> addToken(advanceIf('&') ? Types.NOTE_OUT : Types.STAR);
+            case '^' -> addToken(advanceIf('*') ? Types.EXPONENT : Types.BIT_X0R);
+            case '&' -> addToken(advanceIf('*') ? Types.NOTE_IN : Types.BIT_AND);
             case '!' -> addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
             case '=' -> addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
             case '>' -> addToken(advanceIf('=') ? Types.GREATER_EQUAL : Types.GREATER);
@@ -143,7 +155,6 @@ public class Lexer {
                 }
             }
         }
-
     }
     //TODO does not work
     private void string() {
