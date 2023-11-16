@@ -13,7 +13,7 @@ public class Mouth {
     static boolean hadError = false;
     public Mouth(String[] arguments) throws IOException {
         if (arguments.length > 1) {
-            System.out.println("Using: jlox [script]");
+            System.out.println("Using: mu-lox [script]");
             System.exit(64);
         } else if (arguments.length == 1) {
             runFile(arguments[0]);

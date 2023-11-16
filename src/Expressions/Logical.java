@@ -1,6 +1,6 @@
 package Expressions;
 
-public class Logical extends Expression{
+public class Logical extends Expression {
     Expression left;
     Expression right;
     Token operator;
