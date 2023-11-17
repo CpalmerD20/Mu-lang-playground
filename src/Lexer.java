@@ -5,11 +5,14 @@ import java.util.Map;
 
 public class Lexer {
     private final String source;
-    private final List<Token> tokens = new ArrayList<>();
-    private int start = 0;
-    private int current = 0;
-    private int line = 1;
-
+    private final List<Token> tokens;
+    private int start, current, line;
+    public Lexer(String source) {
+        this.source = source;
+        this.tokens = new ArrayList<>();
+        this.start = 0;
+        this.line = 1;
+    }
     private static final Map<String, Types> keywords;
     static {
         keywords = new HashMap<>();
@@ -37,9 +40,6 @@ public class Lexer {
         keywords.put("is", Types.IS);
     }
 
-    public Lexer(String source) {
-        this.source = source;
-    }
     private boolean isAtEnd() {
         return current >= source.length();
     }
@@ -101,52 +101,83 @@ public class Lexer {
         return isAlpha(c) || isDigit(c);
     }
 
-    private void identifier() {
+    private void makeIdentifier() {
         while (isAlphaNumeric(peek())) {
             advance();
         }
         String text = source.substring(start, current);
         Types type = keywords.get(text);
-        if (type == null) type = Types.IDENTIFIER;
-        addToken(type);
+        if (type == null) {
+            addToken(Types.IDENTIFIER, text);
+        } else {
+            addToken(type);
+        }
     }
     void scanToken() {
         char glyph = advance();
 
         //TODO find out what is wrong with string
         switch (glyph) {
-            case '"' -> string();
-            case ' ' -> noOp();
-            case '\r' -> noOp();
-            case '\t' -> noOp();
-            case '\n' -> line += 1;
-            case '(' -> addToken(Types.L_PAREN);
-            case ')' -> addToken(Types.R_PAREN);
-            case '{' -> addToken(Types.L_CURLY);
-            case '}' -> addToken(Types.R_CURLY);
-            case '[' -> addToken(Types.L_BRACE);
-            case ']' -> addToken(Types.R_BRACE);
-            case ',' -> addToken(Types.COMMA);
-            case '.' -> addToken(Types.DOT);
-            case '-' -> addToken(Types.MINUS);
-            case '+' -> addToken(Types.PLUS);
-            case '%' -> addToken(Types.MODULO);
-            case ':' -> addToken(Types.COLON);
-            case ';' -> addToken(Types.SEMICOLON);
-            case '#' -> addToken(Types.DATA);
-            case '/' -> addToken(advanceIf('>') ? Types.LAMBDA_OUT : Types.SLASH);
-            case '*' -> addToken(advanceIf('&') ? Types.NOTE_OUT : Types.STAR);
-            case '^' -> addToken(advanceIf('*') ? Types.EXPONENT : Types.BIT_X0R);
-            case '&' -> addToken(advanceIf('*') ? Types.NOTE_IN : Types.BIT_AND);
-            case '!' -> addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
-            case '=' -> addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
-            case '>' -> addToken(advanceIf('=') ? Types.GREATER_EQUAL : Types.GREATER);
-            case '<' -> addToken(advanceIf('=') ? Types.LESS_EQUAL : Types.LESS);
-            default -> {
+
+            case ' ' :
+                break;
+            case '\t' :
+                break;
+            case '\r' :
+                break;
+            case '\n' : line += 1;
+                break;
+            case '"' : handleString();
+                break;
+            case '(' : addToken(Types.L_PAREN);
+                break;
+            case ')' : addToken(Types.R_PAREN);
+                break;
+            case '{' : addToken(Types.L_CURLY);
+                break;
+            case '}' : addToken(Types.R_CURLY);
+                break;
+            case '[' : addToken(Types.L_BRACE);
+                break;
+            case ']' : addToken(Types.R_BRACE);
+                break;
+            case ',' : addToken(Types.COMMA);
+                break;
+            case '.' : addToken(Types.DOT);
+                break;
+            case '-' : addToken(Types.MINUS);
+                break;
+            case '+' : addToken(Types.PLUS);
+                break;
+            case '%' : addToken(Types.MODULO);
+                break;
+            case ':' : addToken(Types.COLON);
+                break;
+            case ';' : addToken(Types.SEMICOLON);
+                break;
+            case '#' : addToken(Types.DATA);
+                break;
+            case '/' : addToken(advanceIf('>') ? Types.LAMBDA_OUT : Types.SLASH);
+                break;
+            case '*' : addToken(advanceIf('&') ? Types.NOTE_OUT : Types.STAR);
+                break;
+            case '^' : addToken(advanceIf('*') ? Types.EXPONENT : Types.BIT_X0R);
+                break;
+            case '&' : addToken(advanceIf('*') ? Types.NOTE_IN : Types.BIT_AND);
+                break;
+            case '!' : addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
+                break;
+            case '=' : addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
+                break;
+            case '>' : addToken(advanceIf('=') ? Types.GREATER_EQUAL : Types.GREATER);
+                break;
+            case '<' : addToken(advanceIf('=') ? Types.LESS_EQUAL : Types.LESS);
+                break;
+            default : {
                 if (isDigit(glyph)) {
                     number();
                 } else if (isAlpha(glyph)) {
-                    identifier();
+                    makeIdentifier();
                 } else {
                     Mouth.error(line, "unexpected character");
                 }
@@ -158,16 +189,17 @@ public class Lexer {
     }
 
     //TODO does not work
-    private void string() {
-        while (peek() != '"' && !isAtEnd()) {
+    private void handleString() {
+        while (peek() != '"') {
+            if(isAtEnd()) {
+                Mouth.error(line, "unterminated string");
+                break;
+            }
             if (peek() == '\n') {
                 line += 1;
-                advance();
             }
-        }
-        if (isAtEnd()) {
-            Mouth.error(line, "unterminated string");
-            return;
+            advance();
+
         }
         advance();
         String value = source.substring(start + 1, current - 1);

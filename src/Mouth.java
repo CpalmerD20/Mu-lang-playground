@@ -28,9 +28,10 @@ public class Mouth {
         List<Statement> phrases = Parser.parse();
 
 //      use to print basic tokens TODO REMOVE THE FOR LOOP
-//        for (Token token : tokens) {
-//            System.out.print(token);
-//        }
+        for (Token token : tokens) {
+            System.out.print(token);
+        }
+
         if (hadError) {
             return;
         }

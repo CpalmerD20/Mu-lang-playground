@@ -15,8 +15,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     public void interpret(List<Statement> phrases) {
         try {
-            for (Statement phrase: phrases) {
-                execute(phrase);
+            for (Statement each: phrases) {
+                execute(each);
             }
         } catch (InterpreterError error) {
             report(error);
@@ -202,11 +202,23 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
     @Override
     public Object visitLogicalExpr(Expression.Logical expression) {
-        return null;
+        //TODO test
+        Object left = evaluate(expression.left);
+
+        if (expression.operator.type == Types.OR) {
+            if (isTruthy(left)) return left;
+        } else {
+            if (!isTruthy(left)) return left;
+        }
+        return evaluate(expression.right);
     }
     @Override
     public Object visitAssignExpr(Expression.Assign expression) {
-        return null;
+        Object value = evaluate(expression.value);
+        environment.assignVariable(String.valueOf(expression.name), value);
+        return value;
+
+        //TODO revisit, for mutable | immutable
     }
 
     @Override
@@ -242,8 +254,23 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitBlock(Statement.Block statement) {
+        executeBlock(statement.statements, new Environment(environment));
         return null;
-        //TODO
+    }
+
+    void executeBlock(List<Statement> phrases, Environment parent) {
+        Environment prior = this.environment;
+
+        try {
+            this.environment = parent;
+            for (Statement phrase : phrases) {
+                execute(phrase);
+            }
+        } finally {
+            this.environment = prior;
+        }
+        //restores environment even if exception occurs
+
     }
 
     @Override
@@ -266,8 +293,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitIf(Statement.If statement) {
+        if (isTruthy(evaluate(statement.condition))) {
+            execute(statement.ifTrue);
+        } else if (statement.ifFalse != null) {
+            execute(statement.ifFalse);
+        }
         return null;
-        //TODO
     }
 
     @Override
@@ -305,7 +336,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitRepeat(Statement.Repeat statement) {
+        while (!isTruthy(evaluate(statement.condition))) {
+            execute(statement.body);
+        }
         return null;
-        //TODO
+        //TODO (add until clause, from body)
+        // test potential until clause, if it doesn't work flip isTruthy()
+        // default condition should be null, until updates it
     }
 }
