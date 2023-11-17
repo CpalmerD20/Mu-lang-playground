@@ -1,10 +1,7 @@
-package Lexer;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import Expressions.Token;
 
 public class Lexer {
     private final String source;
@@ -119,9 +116,9 @@ public class Lexer {
         //TODO find out what is wrong with string
         switch (glyph) {
             case '"' -> string();
-            case ' ' -> System.out.print("");
-            case '\r' -> System.out.print(" r ");
-            case '\t' -> System.out.print(" t ");
+            case ' ' -> noOp();
+            case '\r' -> noOp();
+            case '\t' -> noOp();
             case '\n' -> line += 1;
             case '(' -> addToken(Types.L_PAREN);
             case ')' -> addToken(Types.R_PAREN);
@@ -156,6 +153,10 @@ public class Lexer {
             }
         }
     }
+
+    private void noOp() {
+    }
+
     //TODO does not work
     private void string() {
         while (peek() != '"' && !isAtEnd()) {
@@ -177,7 +178,6 @@ public class Lexer {
             start = current;
             scanToken();
             tokens.add(new Token(Types.EOF, "", null, line));
-            //TODO POTENTIAL ERROR
         }
         return tokens;
     }

@@ -1,5 +1,3 @@
-package Expressions;
-import Lexer.Types;
 public class Token {
     public final Types type;
     public final String lexeme;
@@ -13,6 +11,12 @@ public class Token {
     }
 
     public String toString() {
-        return type + " " + lexeme + " " + literal;
+        if (type == Types.EOF) {
+            return "";
+        }
+        if (literal != null) {
+            return type + ": " + "(" + literal + ")\n";
+        }
+        return type + ": " + lexeme + "\n";
     }
 }
