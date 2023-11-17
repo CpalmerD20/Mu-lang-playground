@@ -10,7 +10,8 @@ public class Parser {
         return assignment();
     }
     private static Expression assignment() {
-        Expression e = equality();
+        Expression e = or();
+
         if (match(Types.EQUAL)) {
             Token equals = previous();
             Expression value = assignment();
@@ -22,6 +23,26 @@ public class Parser {
             error(equals, "invalid assignment target.");
         }
         return e;
+    }
+    private static Expression or() {
+        Expression ex = and();
+
+        while (match(Types.OR)) {
+            Token operator = previous();
+            Expression right = and();
+            ex = new Expression.Logical(ex, operator, right);
+        }
+        return ex;
+    }
+    private static Expression and() {
+        Expression ex = equality();
+
+        while (match(Types.AND)) {
+            Token operator = previous();
+            Expression right = equality();
+            ex = new Expression.Logical(ex, operator, right);
+        }
+        return ex;
     }
     private static Expression equality() {
         Expression left = comparison();
@@ -168,10 +189,57 @@ public class Parser {
         return new Statement.Variable(name, init);
     }
     private static Statement statement() {
+        if (match(Types.IF)) {
+            return ifStatement();
+        }
         if (match(Types.PRINT)) {
             return printStatement();
         }
+        if (match(Types.REPEAT)) {
+            return repeatStatement();
+        }
+        if (match(Types.L_CURLY)) {
+            return new Statement.Block(block());
+        }
         return expressionStatement();
+    }
+
+    private static Statement repeatStatement() {
+        //TODO until needs to work like if break, while (false) {}
+        Expression condition = null;
+
+        if (peek().type == Types.UNTIL) {
+            consume(Types.UNTIL, "Possible 'until' clause");
+            condition = expression();
+        }
+        consume(Types.L_CURLY, "EXPECT '{' to begin body");
+        Statement body = statement();
+        consume(Types.R_CURLY, "Expect '}' to end body.");
+
+        return new Statement.Repeat(condition, body);
+    }
+
+    private static Statement ifStatement() {
+        //TODO remove the need for parens
+//        consume(Types.L_PAREN, "Expect '(' after if.");
+        Expression condition = expression();
+        consume(Types.COLON, "Expect ':' to close condition.");
+        Statement ifTrue = statement();
+        Statement elseBranch = null;
+        if (match(Types.ELSE)) {
+            elseBranch = statement();
+        }
+        return new Statement.If(condition, ifTrue, elseBranch);
+    }
+
+    private static List<Statement> block() {
+        List<Statement> phrases = new ArrayList<>();
+
+        while (!check(Types.R_CURLY) && !isAtEnd()) {
+            phrases.add(declaration());
+        }
+        consume(Types.R_CURLY, "Expect '}' after block.");
+        return phrases;
     }
 
     private static Statement printStatement() {

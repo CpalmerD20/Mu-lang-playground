@@ -1,7 +1,7 @@
 import java.util.List;
 
 public abstract class Expression {
-    abstract <R> R accept(Visitor<R> visitor);
+    abstract <R> R accept(Visitor<R> guest);
     interface Visitor<R> {
         R visitAssignExpr(Assign expression);
         R visitBinaryExpr(Binary expression);
@@ -24,8 +24,8 @@ public abstract class Expression {
             this.value = value;
         }
         @Override
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitAssignExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitAssignExpr(this);
         }
     }
     public static class Binary extends Expression {
@@ -37,21 +37,21 @@ public abstract class Expression {
             this.right = right;
             this.operator = operator;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitBinaryExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitBinaryExpr(this);
         }
     }
     public static class Call extends Expression {
-        Expression called;
-        Token paren;
-        List<Expression> arguments;
+        final Expression called;
+        final Token paren;
+        final List<Expression> arguments;
         public Call(Expression called, Token paren, List<Expression> arguments) {
             this.called = called;
             this.paren = paren;
             this.arguments = arguments;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitCallExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitCallExpr(this);
         }
     }
     public static class Data extends Expression {
@@ -59,8 +59,8 @@ public abstract class Expression {
         public Data(Token name) {
             this.name = name;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitDataExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitDataExpr(this);
         }
     }
     public static class Get extends Expression {
@@ -69,8 +69,8 @@ public abstract class Expression {
         public Get(Expression object, Token name) {
             this.object = object;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitGetExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitGetExpr(this);
         }
     }
     public static class Unary extends Expression {
@@ -79,8 +79,8 @@ public abstract class Expression {
         public Unary(Token operator, Expression right) {
             this.operator = operator;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitUnaryExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitUnaryExpr(this);
         }
     }
     public static class This extends Expression {
@@ -88,8 +88,8 @@ public abstract class Expression {
         public This(Token keyword) {
             this.keyword = keyword;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitThisExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitThisExpr(this);
         }
     }
     public static class Set extends Expression {
@@ -101,8 +101,8 @@ public abstract class Expression {
             this.name = name;
             this.value = value;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitSetExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitSetExpr(this);
         }
     }
     public static class Grouping extends Expression {
@@ -110,8 +110,8 @@ public abstract class Expression {
         public Grouping(Expression expression) {
             this.expression = expression;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitGroupingExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitGroupingExpr(this);
         }
     }
     public static class Literal extends Expression {
@@ -119,21 +119,21 @@ public abstract class Expression {
         public Literal(Object value) {
             this.value = value;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitLiteralExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitLiteralExpr(this);
         }
     }
     public static class Logical extends Expression {
-        Expression left;
-        Expression right;
-        Token operator;
+        final Expression left;
+        final Expression right;
+        final Token operator;
         public Logical(Expression left, Token operator, Expression right) {
             this.left = left;
             this.operator = operator;
             this.right = right;
         }
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitLogicalExpr(this);
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitLogicalExpr(this);
         }
 
     }
