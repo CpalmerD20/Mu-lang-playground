@@ -1,5 +1,3 @@
-package Lexer;
-
 public enum Types {
     /* Literals. */ IDENTIFIER, STRING, FLOAT, INTEGER,
 

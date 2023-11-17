@@ -1,7 +1,3 @@
-package Lexer;
-
-import Expressions.*;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,7 +6,9 @@ import java.nio.file.Paths;
 import java.util.List;
 
 public class Mouth {
+    private static final Interpreter interpreter = new Interpreter();
     static boolean hadError = false;
+    public static boolean hadInterpreterError = false;
     public Mouth(String[] arguments) throws IOException {
         if (arguments.length > 1) {
             System.out.println("Using: mu-lox [script]");
@@ -26,26 +24,26 @@ public class Mouth {
         hadError = false;
         Lexer reader = new Lexer(line);
         List<Token> tokens = reader.scanTokens();
-
-//          use to print basic tokens
-        for (Token token : tokens) {
-            System.out.println(token);
-        }
-        //TODO REMOVE THE FOR LOOP
-
         Parser parser = new Parser(tokens);
-        Expression expression = Parser.parse();
+        List<Statement> phrases = Parser.parse();
+
+//      use to print basic tokens TODO REMOVE THE FOR LOOP
+//        for (Token token : tokens) {
+//            System.out.print(token);
+//        }
         if (hadError) {
             return;
         }
-        System.out.println(new TreePrinter().print(expression));
+        assert phrases != null;
+
+        interpreter.interpret(phrases);
     }
     void runPrompt() throws IOException {
         InputStreamReader input = new InputStreamReader(System.in);
         BufferedReader reader = new BufferedReader(input);
 
         for (;;) {
-            System.out.print("> ");
+            System.out.print("\n--> ");
             String line = reader.readLine();
             if (line == null) break;
             run(line);
