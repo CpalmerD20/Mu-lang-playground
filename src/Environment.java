@@ -24,7 +24,7 @@ public class Environment {
         }
         values.put(name, value);
     }
-    void reAssign(Token name, Object value) {
+    void reassign(Token name, Object value) {
         //TODO add to interpreter for identifier = newValue;
         if (values.containsKey(name.lexeme) && name.type != Types.VARIABLE) {
             throw new InterpreterError(name, "can only reassign variables. " + name.lexeme + " is not a variable.");
@@ -34,7 +34,7 @@ public class Environment {
             return;
         }
         if (enclosing != null) {
-            enclosing.reAssign(name, value);
+            enclosing.reassign(name, value);
             return;
         }
         throw new InterpreterError(name, "Undefined identifier: " + name.lexeme);

@@ -12,13 +12,13 @@ public class App {
     static boolean hadInterpreterError = false;
     private static final Interpreter interpreter = new Interpreter();
     public static void main(String[] args) throws IOException {
-//        Mouth promptWithTokens = new Mouth();
+//        AppRunWithTokens promptWithTokens = new AppRunWithTokens();
         runPrompt();
         //TODO make let mutable
         //TODO implement join expression
-        //TODO closures / functions don't work
-        //TODO lambda compare data and function
-        //TODO get !true and !false to compile
+        //TODO implement visitUntil for repeat {}
+        //TODO implement return then lambda functions
+        //TODO implement ! operator
 
 //        if (arguments.length > 1) {
 //            System.out.println("Using: mu-lox [script]");

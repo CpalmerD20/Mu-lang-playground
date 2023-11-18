@@ -3,6 +3,7 @@ import java.util.List;
 public class Parser {
     public static List<Token> tokens;
     private static int current = 0;
+    private static int loops = 0; //not sure if needed, attempting to get 'until true' to work
     public Parser(List<Token> tokens) {
 
         Parser.tokens = tokens;
@@ -259,11 +260,17 @@ public class Parser {
         return new Statement.Data(name, value);
     }
     private static Statement statement() {
+        if (match(Types.UNTIL)) {
+            return untilStatement();
+        }
         if (match(Types.IF)) {
             return ifStatement();
         }
         if (match(Types.PRINT)) {
             return printStatement();
+        }
+        if (match(Types.RETURN)) {
+            return returnStatement();
         }
         if (match(Types.REPEAT)) {
             return repeatStatement();
@@ -274,19 +281,45 @@ public class Parser {
         return expressionStatement();
     }
 
+    private static Statement untilStatement() {
+        if (loops < 1) {
+            error(previous(), "Until expression must be inside repeat {}.");
+        }
+
+        Expression condition = expression();
+        consume(Types.SEMICOLON, "Expect ';' to complete until expression.");
+        return new Statement.Until(condition);
+    }
+
+    private static Statement returnStatement() {
+        Token keyword = previous();
+        Expression value = null;
+        if (!check(Types.SEMICOLON)) {
+            value = expression();
+        }
+        consume(Types.SEMICOLON, "Expect ';' to end return expression.");
+        return new Statement.Return(keyword, value);
+    }
+
     private static Statement repeatStatement() {
         //TODO until needs to work like if break, while (false) {}
-        Expression condition = null;
+        //TODO test with until
 
+        Expression condition = null;
         if (peek().type == Types.UNTIL) {
             consume(Types.UNTIL, "Possible 'until' clause");
             condition = expression();
         }
-        consume(Types.L_CURLY, "EXPECT '{' to begin body");
-        Statement body = statement();
-        consume(Types.R_CURLY, "Expect '}' to end body.");
 
-        return new Statement.Repeat(condition, body);
+        try {
+            loops += 1;
+            consume(Types.L_CURLY, "EXPECT '{' to begin repeat body");
+            List<Statement> body = block(); //assumes left curly has already been matched
+            return new Statement.Repeat(body);
+        } finally {
+            loops -= 1;
+        }
+
     }
 
     private static Statement ifStatement() {
@@ -314,7 +347,7 @@ public class Parser {
 
     private static Statement printStatement() {
         Expression value = expression();
-        consume(Types.SEMICOLON, "Expect ':' after value.");
+        consume(Types.SEMICOLON, "Expect ';' after value.");
         return new Statement.Print(value);
     }
     private static Statement expressionStatement() {

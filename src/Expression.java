@@ -11,7 +11,7 @@ public abstract class Expression {
         R visitLiteralExpr(Literal expression);
         R visitLogicalExpr(Logical expression);
         R visitSetExpr(Set expression);
-        R visitThisExpr(This expression);
+        R visitSelfExpr(Self expression);
         R visitUnaryExpr(Unary expression);
         R visitDataExpr(Data expression);
         R visitVariableExpr(Variable Expression);
@@ -84,13 +84,13 @@ public abstract class Expression {
             return guest.visitUnaryExpr(this);
         }
     }
-    public static class This extends Expression {
+    public static class Self extends Expression {
         final Token keyword;
-        public This(Token keyword) {
+        public Self(Token keyword) {
             this.keyword = keyword;
         }
         <R> R accept(Visitor<R> guest) {
-            return guest.visitThisExpr(this);
+            return guest.visitSelfExpr(this);
         }
     }
     public static class Set extends Expression {

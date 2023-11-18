@@ -3,9 +3,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
-public class Mouth {
+public class AppRunWithTokens {
     private static final Interpreter interpreter = new Interpreter();
-    public Mouth() throws IOException {
+    public AppRunWithTokens() throws IOException {
         prompt();
     }
     void prompt() throws IOException {
