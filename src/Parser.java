@@ -185,7 +185,7 @@ public class Parser {
         return new ParseError();
     }
     static void error(Token token, String message) {
-        Mouth.reportToken(token, "", message);
+        App.reportToken(token, "", message);
     }
 
     private static class ParseError extends RuntimeException {}
@@ -194,11 +194,6 @@ public class Parser {
         List<Statement> declarations = new ArrayList<>();
         try {
             while (!isAtEnd()) {
-                System.out.println("::debug:: looping parse()");
-
-                //TODO DOES CODE REACH HERE? occurs once
-                //IsAtEnd() is true after one iteration
-
                 Statement phrase = declaration();
                 declarations.add(phrase);
             }
@@ -210,15 +205,40 @@ public class Parser {
     }
     private static Statement declaration() {
         try {
-            if (match(Types.VARIABLE) || match(Types.DATA)) {
-                //TODO hash out immutable vs mutable
+            if (match(Types.VARIABLE)) {
+                //TODO hash out mutable
                 return varDeclaration();
+            }
+            if (match(Types.DATA)) {
+                return dataDeclaration();
+            }
+            if (match(Types.CLOSURE)) {
+                return closure("closure");
             }
             return statement();
         } catch (ParseError error) {
             synchronize();
             return null;
         }
+    }
+    private static Statement closure(String kind) {
+        Token name = consume(Types.IDENTIFIER, "Expect " + kind + " name.");
+
+        //TODO review to match closure spec
+        consume(Types.L_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(Types.R_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                parameters.add(consume(Types.IDENTIFIER, "Expect parameter name."));
+            } while (match(Types.COMMA));
+        }
+        consume(Types.R_PAREN, "Expect ')' after parameters");
+        consume(Types.L_CURLY, "Expect '{' before " + kind + " body");
+        List<Statement> body = block(); //assumes left curly has already been matched
+        return new Statement.Closure(name, parameters, body);
     }
     private static Statement varDeclaration() {
         Token name = consume(Types.IDENTIFIER, "Expect variable name.");
@@ -228,6 +248,15 @@ public class Parser {
         }
         consume(Types.SEMICOLON, "Expect ':' after variable declaration.");
         return new Statement.Variable(name, init);
+    }
+    private static Statement dataDeclaration() {
+        Token name = consume(Types.IDENTIFIER, "Expect variable name.");
+        Expression value = null;
+        if (match(Types.EQUAL)) {
+            value = expression();
+        }
+        consume(Types.SEMICOLON, "Expect ':' after variable declaration.");
+        return new Statement.Data(name, value);
     }
     private static Statement statement() {
         if (match(Types.IF)) {
@@ -261,16 +290,16 @@ public class Parser {
     }
 
     private static Statement ifStatement() {
-        //TODO remove the need for parens
-//        consume(Types.L_PAREN, "Expect '(' after if.");
+        //TODO enforce { } for else clause?
         Expression condition = expression();
-        consume(Types.COLON, "Expect ':' to close condition.");
-        Statement ifTrue = statement();
+        consume(Types.L_CURLY, "Expect '{' to open then condition.");
+        Statement thenBranch = statement();
         Statement elseBranch = null;
+        consume(Types.R_CURLY, "Expect '}' to close then condition.");
         if (match(Types.ELSE)) {
             elseBranch = statement();
         }
-        return new Statement.If(condition, ifTrue, elseBranch);
+        return new Statement.If(condition, thenBranch, elseBranch);
     }
 
     private static List<Statement> block() {
@@ -289,9 +318,9 @@ public class Parser {
         return new Statement.Print(value);
     }
     private static Statement expressionStatement() {
-        Expression expr = expression();
+        Expression expression = expression();
         consume(Types.SEMICOLON, "Expect ';' after expression.");
-        return new Statement.ExpState(expr);
+        return new Statement.Expr(expression);
     }
     private static void synchronize() {
         //TODO make sure it works

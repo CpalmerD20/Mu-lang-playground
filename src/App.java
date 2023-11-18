@@ -12,9 +12,22 @@ public class App {
     static boolean hadInterpreterError = false;
     private static final Interpreter interpreter = new Interpreter();
     public static void main(String[] args) throws IOException {
-        Mouth HungryHippo = new Mouth(new String[0]);
+//        Mouth promptWithTokens = new Mouth();
+        runPrompt();
+        //TODO make let mutable
+        //TODO implement join expression
+        //TODO closures / functions don't work
+        //TODO lambda compare data and function
+        //TODO get !true and !false to compile
 
-//        runPrompt();
+//        if (arguments.length > 1) {
+//            System.out.println("Using: mu-lox [script]");
+//            System.exit(64);
+//        } else if (arguments.length == 1) {
+//            runFile(arguments[0]);
+//        } else {
+//            runPrompt();
+//        }
     }
     static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
@@ -33,11 +46,6 @@ public class App {
         if (hadError) {
             return;
         }
-//      use to print basic tokens TODO REMOVE THE FOR LOOP
-        for (Token token : tokens) {
-            System.out.print(token);
-        }
-
         assert phrases != null;
 
         interpreter.interpret(phrases);

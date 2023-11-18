@@ -65,4 +65,8 @@ public class TreePrinter implements Expression.Visitor<String> {
     public String visitDataExpr(Expression.Data expression) {
         return null;
     }
+    @Override
+    public String visitVariableExpr(Expression.Variable Expression) {
+        return null;
+    }
 }

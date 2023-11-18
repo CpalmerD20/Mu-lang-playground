@@ -13,7 +13,7 @@ public class Environment {
         this.enclosing = parent;
     }
 
-    void assignVariable(String name, Object value) {
+    void defineVariable(String name, Object value) {
         values.put(name, value);
 
         //TODO lox refers to as 'define'
@@ -25,6 +25,10 @@ public class Environment {
         values.put(name, value);
     }
     void reAssign(Token name, Object value) {
+        //TODO add to interpreter for identifier = newValue;
+        if (values.containsKey(name.lexeme) && name.type != Types.VARIABLE) {
+            throw new InterpreterError(name, "can only reassign variables. " + name.lexeme + " is not a variable.");
+        }
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value);
             return;
