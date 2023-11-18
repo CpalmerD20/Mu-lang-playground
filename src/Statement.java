@@ -15,7 +15,7 @@ public abstract class Statement {
 
     }
 
-    static class Block extends Statement {
+    public static class Block extends Statement {
         final List<Statement> statements;
         Block(List<Statement> statements) {
             this.statements = statements;
@@ -27,7 +27,7 @@ public abstract class Statement {
         }
     }
 
-    static class Model extends Statement {
+    public static class Model extends Statement {
         final Token name;
         final List<Statement.Variable> properties;
         final List<Statement.Closure> methods;
@@ -42,7 +42,7 @@ public abstract class Statement {
         }
     }
 
-    static class ExpState extends Statement {
+    public static class ExpState extends Statement {
         final Expression expression;
         ExpState(Expression e) {
             this.expression = e;
@@ -54,7 +54,7 @@ public abstract class Statement {
         }
     }
 
-    static class Closure extends Statement {
+    public static class Closure extends Statement {
         final Token name;
         final List<Token> parameters;
         final List<Statement> body;
@@ -69,7 +69,7 @@ public abstract class Statement {
             return visitor.visitClosure(this);
         }
     }
-    static class If extends Statement {
+    public static class If extends Statement {
         final Expression condition;
         final Statement ifTrue;
         final Statement ifFalse;
@@ -84,7 +84,7 @@ public abstract class Statement {
             return visitor.visitIf(this);
         }
     }
-    static class Print extends Statement {
+    public static class Print extends Statement {
         //TODO remove when language becomes more feature complete
         final Expression expression;
         Print (Expression e) {
@@ -96,7 +96,7 @@ public abstract class Statement {
         }
     }
 
-    static class Return extends Statement {
+    public static class Return extends Statement {
         final Token keyword;
         final Expression value;
         Return (Token keyword, Expression value) {
@@ -108,7 +108,7 @@ public abstract class Statement {
             return visitor.visitReturn(this);
         }
     }
-    static class Variable extends Statement {
+    public static class Variable extends Statement {
         final Token name;
         final Expression init;
         Variable (Token name, Expression init) {
@@ -121,7 +121,7 @@ public abstract class Statement {
         }
     }
 
-    static class Data extends Statement {
+    public static class Data extends Statement {
         final Token name;
         final Expression value;
         Data (Token name, Expression value) {
@@ -134,7 +134,7 @@ public abstract class Statement {
         }
     }
 
-    static class Repeat extends Statement {
+    public static class Repeat extends Statement {
         //TODO future doesn't have condition
         final Expression condition;
         final Statement body;

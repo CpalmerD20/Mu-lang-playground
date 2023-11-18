@@ -1,10 +1,12 @@
 import java.util.ArrayList;
 import java.util.List;
 public class Parser {
-    private static List<Token> tokens;
+    public static List<Token> tokens;
     private static int current = 0;
     public Parser(List<Token> tokens) {
-        this.tokens = tokens;
+
+        Parser.tokens = tokens;
+        current = 0;
     }
     private static Expression expression() {
         return assignment();
@@ -112,17 +114,47 @@ public class Parser {
         }
         return left;
     }
+    private static Expression call() {
+        Expression exp = primary();
+        while (true) {
+            if (match(Types.L_PAREN)) {
+                exp = finishCall(exp);
+            } else {
+                break;
+            }
+        }
+        return exp;
+    }
+
+    private static Expression finishCall(Expression called) {
+        List<Expression> parameters = new ArrayList<>();
+        //TODO make sure only function call needs ()
+        if (!check(Types.R_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 arguments.");
+                }
+                parameters.add(expression());
+            } while (match(Types.COMMA));
+        }
+        Token p = consume(Types.R_PAREN, "Expect ')' after paramenters.");
+        return new Expression.Call(called, p, parameters);
+    }
+
     private static Expression unary() {
         if (match(Types.BANG, Types.MINUS)) {
             Token operator = previous();
             Expression right = unary();
             return new Expression.Unary(operator, right);
         }
-        return primary();
+        return call();
     }
     private static Expression primary() {
         if (match(Types.FALSE)) {
             return new Expression.Literal(false);
+        }
+        if (match(Types.TRUE)) {
+            return new Expression.Literal(true);
         }
         if (match(Types.VOID)) {
             return new Expression.Literal(null);
@@ -158,21 +190,30 @@ public class Parser {
 
     private static class ParseError extends RuntimeException {}
 
-    static List<Statement> parse() {
+    public static List<Statement> parse() {
         List<Statement> declarations = new ArrayList<>();
         try {
             while (!isAtEnd()) {
-                declarations.add(declaration());
+                System.out.println("::debug:: looping parse()");
+
+                //TODO DOES CODE REACH HERE? occurs once
+                //IsAtEnd() is true after one iteration
+
+                Statement phrase = declaration();
+                declarations.add(phrase);
             }
+            return declarations;
         } catch (ParseError error) {
             return null;
         }
-        return declarations;
-        //TODO return after adding statements
+
     }
     private static Statement declaration() {
         try {
-            if (match(Types.VARIABLE)) return varDeclaration();
+            if (match(Types.VARIABLE) || match(Types.DATA)) {
+                //TODO hash out immutable vs mutable
+                return varDeclaration();
+            }
             return statement();
         } catch (ParseError error) {
             synchronize();
@@ -269,9 +310,9 @@ public class Parser {
                 case IF:
                 case REPEAT:
                 case PRINT:
-                case RETURN: return;
+                case RETURN:
+                    return;
             }
-
             advance();
         }
     }
