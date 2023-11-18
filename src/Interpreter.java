@@ -266,11 +266,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Object visitThisExpr(Expression.This expression) {
+    public Object visitSelfExpr(Expression.Self expression) {
         return null;
     }
-
-
 
     @Override
     public Object visitDataExpr(Expression.Data expression) {
@@ -278,7 +276,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Object visitVariableExpr(Expression.Variable Expression) {
+    public Object visitVariableExpr(Expression.Variable expression) {
+        //TODO implement
+        return findVariable(expression.name, expression);
+    }
+
+    private Object findVariable(Token name, Expression expression) {
         //TODO implement
         return null;
     }
@@ -289,25 +292,23 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return null;
     }
 
-    void executeBlock(List<Statement> phrases, Environment parent) {
+    void executeBlock(List<Statement> statements, Environment parent) {
         Environment prior = this.environment;
 
         try {
             this.environment = parent;
-            for (Statement phrase : phrases) {
-                execute(phrase);
+            for (Statement each : statements) {
+                execute(each);
             }
         } finally {
-            this.environment = prior;
+            this.environment = prior; //restores environment even if exception occurs
         }
-        //restores environment even if exception occurs
-
     }
 
     @Override
     public Void visitModel(Statement.Model statement) {
         return null;
-        //TODO
+        //TODO implement
     }
 
     @Override
@@ -348,8 +349,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitReturn(Statement.Return statement) {
-        return null;
-        //TODO
+        Object value = null;
+        if (statement.value != null) {
+            value = evaluate(statement.value);
+        }
+        throw new Return(value);
     }
 
     @Override
@@ -374,12 +378,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitRepeat(Statement.Repeat statement) {
-        while (!isTruthy(evaluate(statement.condition))) {
-            execute(statement.body);
+        while (true) {
+            for (Statement each : statement.body) {
+                execute(each);
+            }
+        }
+    }
+
+    @Override
+    public Void visitUntil(Statement.Until statement) {
+        //TODO implement Until aka (break if true);
+        // almost works
+        if (isTruthy(statement.expression)) {
+            throw new Until();
         }
         return null;
-        //TODO (add until clause, from body)
-        // test potential until clause, if it doesn't work flip isTruthy()
-        // default condition should be null, until updates it
     }
 }

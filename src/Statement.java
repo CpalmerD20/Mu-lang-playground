@@ -13,6 +13,7 @@ public abstract class Statement {
         R visitVariable(Variable statement);
         R visitData(Data statement);
         R visitRepeat(Repeat statement);
+        R visitUntil(Until statement);
 
     }
 
@@ -52,6 +53,16 @@ public abstract class Statement {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitExpression(this);
+        }
+    }
+
+    public static class Until extends Statement {
+        final Expression expression;
+        Until(Expression e) { this.expression = e; }
+
+        @Override
+        <R> R accept(Visitor<R> visitor) {
+            return visitor.visitUntil(this);
         }
     }
 
@@ -150,11 +161,8 @@ public abstract class Statement {
     }
 
     public static class Repeat extends Statement {
-        //TODO future doesn't have condition
-        final Expression condition;
-        final Statement body;
-        Repeat (Expression condition, Statement body) {
-            this.condition = condition;
+        final List<Statement> body;
+        Repeat (List<Statement> body) {
             this.body = body;
         }
         <R> R accept(Visitor<R> visitor) {

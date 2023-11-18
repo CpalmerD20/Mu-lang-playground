@@ -54,7 +54,7 @@ public class TreePrinter implements Expression.Visitor<String> {
         return null;
     }
     @Override
-    public String visitThisExpr(Expression.This expression) {
+    public String visitSelfExpr(Expression.Self expression) {
         return null;
     }
     @Override
