@@ -1,27 +1,35 @@
 import java.util.List;
 import java.util.ArrayList;
 
-class InterpreterError extends RuntimeException {
-    final Environment globals = new Environment();
-    private Environment environment = globals;
-    final Token token;
-    InterpreterError(Token token, String message) {
-        super(message);
-        this.token = token;
-    }
-}
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
+    final Environment globals = new Environment();
     private Environment environment = new Environment();
+    Interpreter() {
+        //TODO rename clock()
+        globals.assignData("clock", new MyCallable() {
+            @Override
+            public int arity() {
+                return 0;
+            }
+            @Override
+            public Object call(Interpreter interpreter, List<Object> parameters) {
+                return (double)System.currentTimeMillis() / 1000;
+            }
+            @Override
+            public String toString() {
+                return "<native fn>";
+            }
+        });
+    }
     private Object evaluate(Expression e) {
         return e.accept(this);
     }
 
     public void interpret(List<Statement> phrases) {
+        System.out.println("...interpreting...");
         try {
             for (Statement each: phrases) {
-                System.out.println(each + ": WE GOT TO INTERPRET"); //TODO REMOVE
                 execute(each);
-
             }
         } catch (InterpreterError error) {
             report(error);
@@ -35,8 +43,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         System.err.println(
             error.getMessage() + "\n[line : " + error.token.line + "]"
         );
-//        hadInterpreterError = true;
-        //TODO
+        App.hadInterpreterError = true;
     }
     private String stringify(Object subject) {
         if (subject == null) {
@@ -88,14 +95,14 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (left instanceof String || right instanceof String)
         return "" + left + right;
     */
-    private boolean isTruthy(Object o) {
+    private boolean isTruthy(Object object) {
         //TODO revisit empty sequences like Python?
         // if o == 0 ?
-        if (o == null) {
+        if (object == null) {
             return false;
         }
-        if (o instanceof Boolean) {
-            return (boolean)o;
+        if (object instanceof Boolean) {
+            return (boolean)object;
         }
         return true;
     }
@@ -219,7 +226,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitAssignExpr(Expression.Assign expression) {
         Object value = evaluate(expression.value);
-        environment.assignVariable(String.valueOf(expression.name), value);
+        environment.defineVariable(String.valueOf(expression.name), value);
         return value;
 
         //TODO revisit, for mutable | immutable
@@ -228,14 +235,14 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitCallExpr(Expression.Call expression) {
         Object called = evaluate(expression.called);
-        if (!(called instanceof FnCallable)) {
+        if (!(called instanceof MyCallable)) {
             throw new InterpreterError(expression.paren, "Can only call functions, closures, and models.");
         }
         List<Object> parameters = new ArrayList<>();
         for (Expression argument : expression.arguments) {
             parameters.add(evaluate(argument));
         }
-        FnCallable function = (FnCallable)called;
+        MyCallable function = (MyCallable)called;
 
         if (parameters.size() != function.arity()) {
             throw new InterpreterError(expression.paren, "Expected " + function.arity() + " parameters but got " + parameters.size());
@@ -271,6 +278,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
+    public Object visitVariableExpr(Expression.Variable Expression) {
+        //TODO implement
+        return null;
+    }
+
+    @Override
     public Void visitBlock(Statement.Block statement) {
         executeBlock(statement.statements, new Environment(environment));
         return null;
@@ -298,15 +311,22 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Void visitExpression(Statement.ExpState statement) {
+    public Void visitExpression(Statement.Expr statement) {
         evaluate(statement.expression);
         return null;
     }
 
     @Override
-    public Void visitClosure(Statement.Closure statement) {
+    public Void visitLambda(Statement.LambdaIn statement) {
         return null;
-        //TODO
+    }
+
+    @Override
+    public Void visitClosure(Statement.Closure statement) {
+        MyClosure newClosure = new MyClosure(statement);
+        environment.defineVariable(statement.name.lexeme, newClosure);
+        return null;
+        //TODO copy for lambdas
     }
 
     @Override
@@ -338,7 +358,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (statement.init != null) {
             value = evaluate(statement.init);
         }
-        environment.assignVariable(statement.name.lexeme, value);
+        environment.defineVariable(statement.name.lexeme, value);
         return null;
     }
 

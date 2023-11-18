@@ -16,7 +16,7 @@ public class Lexer {
     private static final Map<String, Types> keywords;
     static {
         keywords = new HashMap<>();
-        keywords.put("each", Types.LAMBDA_IN);
+        keywords.put("each", Types.LAMBDA);
         keywords.put("true", Types.TRUE);
         keywords.put("false", Types.FALSE);
         keywords.put("join", Types.JOIN);
@@ -157,7 +157,7 @@ public class Lexer {
                 break;
             case '#' : addToken(Types.DATA);
                 break;
-            case '/' : addToken(advanceIf('>') ? Types.LAMBDA_OUT : Types.SLASH);
+            case '/' : addToken(advanceIf('>') ? Types.MU : Types.SLASH);
                 break;
             case '*' : addToken(advanceIf('&') ? Types.NOTE_OUT : Types.STAR);
                 break;
@@ -179,7 +179,7 @@ public class Lexer {
                 } else if (isAlpha(glyph)) {
                     makeIdentifier();
                 } else {
-                    Mouth.error(line, "unexpected character");
+                    App.error(line, "unexpected character");
                 }
             }
         }
@@ -192,7 +192,7 @@ public class Lexer {
     private void handleString() {
         while (peek() != '"') {
             if(isAtEnd()) {
-                Mouth.error(line, "unterminated string");
+                App.error(line, "unterminated string");
                 break;
             }
             if (peek() == '\n') {

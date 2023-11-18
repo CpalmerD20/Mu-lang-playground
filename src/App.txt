@@ -1,0 +1,72 @@
+Grammar Mu;
+
+program     → declaration* EOF ;
+
+* Declarations *
+| variable | data | model | closure | statement ;
+
+variable    → 'let' IDENTIFIER '=' EXPRESSION ';'
+            ;
+data        → '#' IDENTIFIER '=' EXPRESSION ';'
+            ;
+closure     → 'define' IDENTIFIER '(' PARAMETERS* ')' { BODY } ';'
+            ;
+model       → model IDENTIFIER ?from IDENTIFIER? '(' CONSTRUCTION_PROPERTIES* ')' { (LOCAL_PROPERTIES*) METHODS* }
+            ;
+
+* Statements *
+| expression-statement | if | return | repeat | until | skip | stop | block ;
+
+expression  → expression ';'
+            ;
+if          → 'if' EXPRESSION 'then' STATEMENT 'else' STATEMENT ';'
+            ;
+return      → 'return' EXPRESSION ';'
+            ;
+repeat      → 'repeat' '{' BODY '}'
+            ;
+until       → 'until' EXPRESSION ';'
+            ;
+block       → '{' DECLARATION '}'
+
+* Expressions *
+| lambda | join | match
+| assignment AKA mutation
+| or | and | equality
+| comparison | term
+| factor | unary
+| call | primary ;
+
+lambda      → 'each' '(' PARAMETERS* ')' { BODY } ';'
+            → '/>' PARAMETERS* '.' BODY ';'
+            → 'each' PARAMETERS* '/>' BODY ';'
+            ;
+join        → 'join' '(' STRING STRING... ')' ';'
+            ;
+match       → //TODO
+            ;
+mutation    → ?( call '.' )? IDENTIFIER '=' ASSIGNMENT | logic_or
+            ;
+logic_or    → logic_and ( 'or' logic_and )*
+            ;
+equality    → comparison (( '!=' | '==' ) comparison )*
+            ;
+comparison 	→ term ( ( > | >= | < | <= ) term )*
+            ;
+term       	→ factor ( ( - | + ) factor )*
+            ;
+factor     	→ unary ( ( / | * | ^* ) unary )*
+            ;
+unary      	→ ( "!" | "-" ) unary | call
+            ;
+call       	→ primary ( "(" arguments? ")" | "." IDENTIFIER )*
+            ;
+primary    	→ "true" | "false" | "void" | "self"
+            | NUMBER | STRING | IDENTIFIER | "(" expression ")"
+
+* Lexical *
+NUMBER     	→ DIGIT+ ( "." DIGIT+ )? ;
+STRING     	→ "\"" <any char except "\"">* "\"" ;
+IDENTIFIER 	→ ALPHA ( ALPHA | DIGIT )* ;
+ALPHA      	→ "a" ... "z" | "A" ... "Z" | "_" ;
+DIGIT      	→ "0" ... "9" ;
