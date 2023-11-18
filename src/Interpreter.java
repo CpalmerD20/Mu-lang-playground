@@ -1,6 +1,9 @@
 import java.util.List;
+import java.util.ArrayList;
 
 class InterpreterError extends RuntimeException {
+    final Environment globals = new Environment();
+    private Environment environment = globals;
     final Token token;
     InterpreterError(Token token, String message) {
         super(message);
@@ -16,7 +19,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     public void interpret(List<Statement> phrases) {
         try {
             for (Statement each: phrases) {
+                System.out.println(each + ": WE GOT TO INTERPRET"); //TODO REMOVE
                 execute(each);
+
             }
         } catch (InterpreterError error) {
             report(error);
@@ -34,12 +39,11 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         //TODO
     }
     private String stringify(Object subject) {
-        String text = "";
         if (subject == null) {
             return "void";
         }
         if (subject instanceof Double) {
-            text = subject.toString();
+            String text = subject.toString();
             if (text.endsWith(".0")) {
                 text = text.substring(0, text.length() - 2);
             }
@@ -223,7 +227,21 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Object visitCallExpr(Expression.Call expression) {
-        return null;
+        Object called = evaluate(expression.called);
+        if (!(called instanceof FnCallable)) {
+            throw new InterpreterError(expression.paren, "Can only call functions, closures, and models.");
+        }
+        List<Object> parameters = new ArrayList<>();
+        for (Expression argument : expression.arguments) {
+            parameters.add(evaluate(argument));
+        }
+        FnCallable function = (FnCallable)called;
+
+        if (parameters.size() != function.arity()) {
+            throw new InterpreterError(expression.paren, "Expected " + function.arity() + " parameters but got " + parameters.size());
+        }
+
+        return function.call(this, parameters);
     }
 
     @Override

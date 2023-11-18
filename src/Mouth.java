@@ -24,18 +24,27 @@ public class Mouth {
         hadError = false;
         Lexer reader = new Lexer(line);
         List<Token> tokens = reader.scanTokens();
-        Parser parser = new Parser(tokens);
-        List<Statement> phrases = Parser.parse();
 
-//      use to print basic tokens TODO REMOVE THE FOR LOOP
-        for (Token token : tokens) {
+        Parser parser = new Parser(tokens);
+
+        for (Token token : Parser.tokens) {
             System.out.print(token);
         }
 
+        List<Statement> phrases = Parser.parse();
+        assert phrases != null;
+
+        var counter = 0;
+        System.out.println("::debug:: Statements " + Parser.tokens.size());
+        for (Statement p : phrases) {
+            System.out.println(p +" "+ counter); //null 0
+            counter += 1;
+        }
+        System.out.println("::debug::Finished Phrases");
         if (hadError) {
             return;
         }
-        assert phrases != null;
+
 
         interpreter.interpret(phrases);
     }

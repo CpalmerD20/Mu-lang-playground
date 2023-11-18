@@ -11,12 +11,12 @@ public class Token {
     }
 
     public String toString() {
-        if (type == Types.EOF) {
-            return "";
-        }
+//        if (type == Types.EOF) {
+//            return "";
+//        }
         if (literal != null) {
             return type + ": " + "(" + literal + ")\n";
         }
-        return type + ": " + lexeme + "\n";
+        return type + ": " + lexeme + " " + literal + "\n";
     }
 }

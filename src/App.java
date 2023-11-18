@@ -12,16 +12,9 @@ public class App {
     static boolean hadInterpreterError = false;
     private static final Interpreter interpreter = new Interpreter();
     public static void main(String[] args) throws IOException {
-        Mouth input = new Mouth(new String[0]);
+        Mouth HungryHippo = new Mouth(new String[0]);
 
-//        if (args.length > 1) {
-//            System.out.println("Usage: ./lox [path-to-file]");
-//            System.exit(64);
-//        } else if (args.length == 1) {
-//            runFile(args[0]);
-//        } else {
-//            runPrompt();
-//        }
+//        runPrompt();
     }
     static void runFile(String path) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get(path));
@@ -55,13 +48,11 @@ public class App {
         BufferedReader reader = new BufferedReader(input);
 
         for (;;) {
-            System.out.print("--> ");
-            if (reader.readLine() == null) {
-                break;
-            }
-            run(reader.readLine());
+            System.out.print("\n--> ");
+            String line = reader.readLine();
+            if (line == null) break;
+            run(line);
             hadError = false;
-            hadInterpreterError = false;
         }
     }
     static void error(int line, String message) {

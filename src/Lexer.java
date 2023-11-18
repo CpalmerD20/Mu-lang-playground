@@ -209,8 +209,9 @@ public class Lexer {
         while (!isAtEnd()) {
             start = current;
             scanToken();
-            tokens.add(new Token(Types.EOF, "", null, line));
         }
+        tokens.add(new Token(Types.EOF, "", null, line));
+
         return tokens;
     }
 }

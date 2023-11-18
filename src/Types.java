@@ -1,5 +1,5 @@
 public enum Types {
-    /* Literals. */ IDENTIFIER, STRING, FLOAT, INTEGER,
+    /* Literals. */ IDENTIFIER, STRING, FLOAT, INTEGER, WS,
 
     //OPERATORS
     L_PAREN, R_PAREN, L_CURLY, R_CURLY, L_BRACE, R_BRACE,
