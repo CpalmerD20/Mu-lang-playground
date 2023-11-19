@@ -5,7 +5,6 @@ public class Parser {
     private static int current = 0;
     private static int loops = 0; //not sure if needed, attempting to get 'until true' to work
     public Parser(List<Token> tokens) {
-
         Parser.tokens = tokens;
         current = 0;
     }
@@ -19,33 +18,38 @@ public class Parser {
             Token equals = previous();
             Expression value = assignment();
 
+//            if (e instanceof Expression.Variable) {
+//                Token name = ((Expression.Variable)e).name;
+//                return new Expression.Assign(name, value);
+//            }
+            //TODO both let and # are Expression.Data at this point
             if (e instanceof Expression.Data) {
                 Token name = ((Expression.Data)e).name;
                 return new Expression.Assign(name, value);
             }
-            error(equals, "invalid assignment target.");
+            error(equals, "Can only reassign to a declared variable. [ variables are declared with the 'let' keyword. ]");
         }
         return e;
     }
     private static Expression or() {
-        Expression ex = and();
+        Expression exp = and();
 
         while (match(Types.OR)) {
             Token operator = previous();
             Expression right = and();
-            ex = new Expression.Logical(ex, operator, right);
+            exp = new Expression.Logical(exp, operator, right);
         }
-        return ex;
+        return exp;
     }
     private static Expression and() {
-        Expression ex = equality();
+        Expression exp = equality();
 
         while (match(Types.AND)) {
             Token operator = previous();
             Expression right = equality();
-            ex = new Expression.Logical(ex, operator, right);
+            exp = new Expression.Logical(exp, operator, right);
         }
-        return ex;
+        return exp;
     }
     private static Expression equality() {
         Expression left = comparison();
@@ -243,20 +247,22 @@ public class Parser {
     }
     private static Statement varDeclaration() {
         Token name = consume(Types.IDENTIFIER, "Expect variable name.");
-        Expression init = null;
+        Expression value = null;
+
         if (match(Types.EQUAL)) {
-            init = expression();
+            value = expression();
         }
-        consume(Types.SEMICOLON, "Expect ':' after variable declaration.");
-        return new Statement.Variable(name, init);
+
+        consume(Types.SEMICOLON, "Expect ';' at end to declare variable.");
+        return new Statement.Variable(name, value);
     }
     private static Statement dataDeclaration() {
-        Token name = consume(Types.IDENTIFIER, "Expect variable name.");
+        Token name = consume(Types.IDENTIFIER, "Expect data name.");
         Expression value = null;
         if (match(Types.EQUAL)) {
             value = expression();
         }
-        consume(Types.SEMICOLON, "Expect ':' after variable declaration.");
+        consume(Types.SEMICOLON, "Expect ';' at end to declare data.");
         return new Statement.Data(name, value);
     }
     private static Statement statement() {

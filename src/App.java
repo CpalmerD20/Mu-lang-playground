@@ -12,9 +12,9 @@ public class App {
     static boolean hadInterpreterError = false;
     private static final Interpreter interpreter = new Interpreter();
     public static void main(String[] args) throws IOException {
-//        AppRunWithTokens promptWithTokens = new AppRunWithTokens();
-        runPrompt();
-        //TODO make let mutable
+        AppRunWithTokens promptWithTokens = new AppRunWithTokens();
+//        runPrompt();
+        //TODO let is now mutable, add in guards to avoid mutating #
         //TODO implement join expression
         //TODO implement visitUntil for repeat {}
         //TODO implement return then lambda functions

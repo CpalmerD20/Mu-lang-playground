@@ -127,6 +127,8 @@ public class Lexer {
                 break;
             case '\n' : line += 1;
                 break;
+            case ';' : addToken(Types.SEMICOLON);
+                break;
             case '"' : handleString();
                 break;
             case '(' : addToken(Types.L_PAREN);
@@ -141,9 +143,9 @@ public class Lexer {
                 break;
             case ']' : addToken(Types.R_BRACE);
                 break;
-            case ',' : addToken(Types.COMMA);
+            case '#' : addToken(Types.DATA);
                 break;
-            case '.' : addToken(Types.DOT);
+            case ',' : addToken(Types.COMMA);
                 break;
             case '-' : addToken(Types.MINUS);
                 break;
@@ -151,27 +153,27 @@ public class Lexer {
                 break;
             case '%' : addToken(Types.MODULO);
                 break;
-            case ':' : addToken(Types.COLON);
+            case '.' : addToken(advanceIf('.') ? Types.RANGE : Types.DOT);
                 break;
-            case ';' : addToken(Types.SEMICOLON);
-                break;
-            case '#' : addToken(Types.DATA);
+            case '!' : addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
                 break;
             case '/' : addToken(advanceIf('>') ? Types.MU : Types.SLASH);
                 break;
-            case '*' : addToken(advanceIf('&') ? Types.NOTE_OUT : Types.STAR);
+            case '*' : addToken(advanceIf('^') ? Types.EXPONENT : Types.STAR);
                 break;
             case '^' : addToken(advanceIf('*') ? Types.EXPONENT : Types.BIT_X0R);
                 break;
             case '&' : addToken(advanceIf('*') ? Types.NOTE_IN : Types.BIT_AND);
                 break;
-            case '!' : addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
+            case '~' : addToken(advanceIf('!') ? Types.COMMENT : Types.BIT_NOT);
                 break;
             case '=' : addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
                 break;
             case '>' : addToken(advanceIf('=') ? Types.GREATER_EQUAL : Types.GREATER);
                 break;
             case '<' : addToken(advanceIf('=') ? Types.LESS_EQUAL : Types.LESS);
+                break;
+            case ':' : addToken(advanceIf(':') ? Types.DOUBLE_COLON : Types.COLON);
                 break;
             default : {
                 if (isDigit(glyph)) {

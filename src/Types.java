@@ -2,20 +2,21 @@
 //TODO add in integer types
 public enum Types {
     /* Literals. */
-    IDENTIFIER, STRING, FLOAT, EOF,
-
+    IDENTIFIER, STRING, FLOAT, COMMENT, EOF,
+    //                            ~!
     /* OPERATORS */
     NOTE_IN, NOTE_OUT, L_PAREN, R_PAREN, L_CURLY, R_CURLY, L_BRACE, R_BRACE,
-    // &*     *&         ()                {}               []
+    // ~!      !~         ()                {}               []
     BANG, COMMA, COLON, DOT, EQUAL, SEMICOLON, SLASH, STAR, GREATER, LESS,
     // !    ,      :     .      =       ;       /      *       >       <
-    MINUS, PLUS, MODULO, BIT_AND, BIT_X0R, BITSHIFT_R, BITSHIFT_L, DATA,
-    // -    +      %        &        ^        >>         <<         #
+    MINUS, PLUS, MODULO, BIT_AND, BIT_X0R, BIT_NOT,  DATA,
+    // -    +      %        &        ^        ~       #
 
     /* TWO CHARACTERS */
-    BANG_EQUAL, EQUAL_EQUAL, EXPONENT, MU, GREATER_EQUAL, LESS_EQUAL,
-    // !=           ==          ^*     />      >=           <=
-
+    BANG_EQUAL, EQUAL_EQUAL, EXPONENT, MU, GREATER_EQUAL, LESS_EQUAL, BIT_RIGHT, BIT_LEFT,
+    // !=           ==          ^*     />      >=           <=           >>        <<
+    RANGE, DOUBLE_COLON,
+    // ..       ::
     // Keywords.
     LAMBDA, CLOSURE,
     //each   define
@@ -24,3 +25,5 @@ public enum Types {
     JOIN, MATCH, PRINT, VARIABLE, MODEL, SELF,
 
 }
+
+// YIELD, APPLY

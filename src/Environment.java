@@ -8,31 +8,35 @@ public class Environment {
     Environment() {
         enclosing = null;
     }
-
-    Environment(Environment parent) {
-        this.enclosing = parent;
+    Environment(Environment closure) {
+        this.enclosing = closure;
     }
 
-    void defineVariable(String name, Object value) {
+    Environment ancestor(int n) {
+        Environment environment = this;
+        for (int i = 0; i < n; i += 1) {
+            environment = environment.enclosing;
+        }
+        return environment;
+    }
+    void define(String name, Object value) {
         values.put(name, value);
-
-        //TODO lox refers to as 'define'
     }
-    void assignData(String name, Object value) {
+    void defineData(String name, Object value) {
         if (values.containsKey(name)) {
             throw new RuntimeException("Data point has already been assigned: " + name);
         }
         values.put(name, value);
     }
     void reassign(Token name, Object value) {
-        //TODO add to interpreter for identifier = newValue;
-        if (values.containsKey(name.lexeme) && name.type != Types.VARIABLE) {
-            throw new InterpreterError(name, "can only reassign variables. " + name.lexeme + " is not a variable.");
+        if (name.type != Types.VARIABLE) {
+            throw new InterpreterError(name, "can only reassign variables " + name.lexeme + " is not a variable.");
         }
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value);
             return;
         }
+
         if (enclosing != null) {
             enclosing.reassign(name, value);
             return;

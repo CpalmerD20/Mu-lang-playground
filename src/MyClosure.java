@@ -3,31 +3,24 @@ import java.util.List;
 public class MyClosure implements MyCallable {
     //environment(parent) ...closure
     private final Statement.Closure declaration; //TODO change to lamda or refactor class to closure
+    private final Environment parent;
 /*
     private final boolean isInitializer;
-    private final Environment parent;
-    MyClosure(Statement.Closure declaration, Environment parent, boolean isInitializer) {
+*/
+    MyClosure(Statement.Closure declaration, Environment parent) {
         this.declaration = declaration;
         this.parent = parent;
-        this.isInitializer = isInitializer;
     }
-*/
-    MyClosure(Statement.Closure declaration) {
-        this.declaration = declaration;
-    }
-
     @Override
     public int arity() {
         return declaration.parameters.size();
     }
-
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
-//        Environment environment = new Environment(parent);
-        Environment environment = new Environment(interpreter.globals);
+        Environment environment = new Environment(parent);
 
         for (int i = 0; i < declaration.parameters.size(); i += 1) {
-            environment.defineVariable(declaration.parameters.get(i).lexeme, arguments.get(i));
+            environment.define(declaration.parameters.get(i).lexeme, arguments.get(i));
         }
         try {
             interpreter.executeBlock(declaration.body, environment);

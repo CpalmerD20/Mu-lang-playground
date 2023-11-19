@@ -136,10 +136,10 @@ public abstract class Statement {
     }
     public static class Variable extends Statement {
         final Token name;
-        final Expression init;
-        Variable (Token name, Expression init) {
+        final Expression value;
+        Variable (Token name, Expression value) {
             this.name = name;
-            this.init = init;
+            this.value = value;
         }
         @Override
         <R> R accept(Visitor<R> visitor) {
