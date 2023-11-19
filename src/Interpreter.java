@@ -1,12 +1,16 @@
+import java.util.HashMap;
+import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-    final Environment globals = new Environment();
+//    private final Environment globals = new Environment();
     private Environment environment = new Environment();
+    private final Map<Expression, Integer> locals = new HashMap<>();
+    //TODO find out if both are needed
     Interpreter() {
-        //TODO rename clock()
-        globals.assignData("clock", new MyCallable() {
+        //TODO rename clock(), change define to defineData();
+        environment.define("clock", new MyCallable() {
             @Override
             public int arity() {
                 return 0;
@@ -96,8 +100,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return "" + left + right;
     */
     private boolean isTruthy(Object object) {
-        //TODO revisit empty sequences like Python?
-        // if o == 0 ?
+        //TODO revisit empty sequences like Python? if object == 0 ?
         if (object == null) {
             return false;
         }
@@ -226,7 +229,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitAssignExpr(Expression.Assign expression) {
         Object value = evaluate(expression.value);
-        environment.defineVariable(String.valueOf(expression.name), value);
+        environment.reassign((expression.name), value);
         return value;
 
         //TODO revisit, for mutable | immutable
@@ -277,11 +280,16 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Object visitVariableExpr(Expression.Variable expression) {
-        //TODO implement
         return findVariable(expression.name, expression);
     }
 
     private Object findVariable(Token name, Expression expression) {
+//        Integer distance = locals.get(expression);
+//        if (distance != null) {
+//            return environment.ancestor(distance, name.lexeme);
+//        } else {
+//            return environment.get(name);
+//        }
         //TODO implement
         return null;
     }
@@ -319,15 +327,18 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitLambda(Statement.LambdaIn statement) {
+        MyLambda lambda = new MyLambda(statement);
+        environment.define(statement.name.lexeme, lambda);
         return null;
+        //TODO should be assignData()
+        //TODO test and implement anonymous
     }
 
     @Override
     public Void visitClosure(Statement.Closure statement) {
-        MyClosure newClosure = new MyClosure(statement);
-        environment.defineVariable(statement.name.lexeme, newClosure);
+        MyClosure closure = new MyClosure(statement, environment);
+        environment.define(statement.name.lexeme, closure);
         return null;
-        //TODO copy for lambdas
     }
 
     @Override
@@ -359,10 +370,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Void visitVariable(Statement.Variable statement) {
         Object value = null;
-        if (statement.init != null) {
-            value = evaluate(statement.init);
+        if (statement.value != null) {
+            value = evaluate(statement.value);
         }
-        environment.defineVariable(statement.name.lexeme, value);
+        environment.define(statement.name.lexeme, value);
         return null;
     }
 
@@ -372,7 +383,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (statement.value != null) {
             value = evaluate(statement.value);
         }
-        environment.assignData(statement.name.lexeme, value);
+//        environment.assignData(statement.name.lexeme, value);
+        environment.define(statement.name.lexeme, value);
+        //TODO fix once you get mutability figured out;
         return null;
     }
 
