@@ -14,9 +14,7 @@ public class Environment {
 
     Environment ancestor(int n) {
         Environment environment = this;
-        for (int i = 0; i < n; i += 1) {
-            environment = environment.enclosing;
-        }
+        for (int i = 0; i < n; i += 1) environment = environment.enclosing;
         return environment;
     }
     void define(String name, Object value) {
@@ -46,5 +44,11 @@ public class Environment {
             return enclosing.get(name);
         }
         throw new InterpreterError(name, "Undefined variable: " + name);
+    }
+    Object getAt(int depth, String name) {
+        return ancestor(depth).values.get(name);
+    }
+    void assignAt(int depth, Token name, Object value) {
+        ancestor(depth).values.put(name.lexeme, value);
     }
 }

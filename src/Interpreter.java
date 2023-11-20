@@ -6,8 +6,8 @@ import java.util.ArrayList;
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
 //    private final Environment globals = new Environment();
     private Environment environment = new Environment();
-    private final Map<Expression, Integer> locals = new HashMap<>();
-    //TODO find out if both are needed
+    private final Map<Expression, Integer> locals = new HashMap<>(); //needed for closures
+
     Interpreter() {
         //TODO rename clock(), change define to defineData();
         environment.define("clock", new MyCallable() {
@@ -229,10 +229,13 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitAssignExpr(Expression.Assign expression) {
         Object value = evaluate(expression.value);
-        environment.reassign((expression.name), value);
-        return value;
+        Integer depth = locals.get(expression);
 
-        //TODO revisit, for mutable | immutable
+        if (depth != null) {
+            environment.assignAt(depth, expression.name, value);
+        } else environment.reassign((expression.name), value);
+
+        return value; //TODO revisit, for mutable | immutable
     }
 
     @Override
@@ -284,14 +287,12 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     private Object findVariable(Token name, Expression expression) {
-//        Integer distance = locals.get(expression);
-//        if (distance != null) {
-//            return environment.ancestor(distance, name.lexeme);
-//        } else {
-//            return environment.get(name);
-//        }
-        //TODO implement
-        return null;
+        Integer distance = locals.get(expression);
+        if (distance != null) {
+            return environment.getAt(distance, name.lexeme);
+        } else {
+            return environment.get(name);
+        }
     }
 
     @Override
@@ -408,6 +409,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         return null;
     }
 
-    public void resolve(Expression expression, int i) {
+    public void resolve(Expression expression, int depth) {
+        locals.put(expression, depth);
     }
 }

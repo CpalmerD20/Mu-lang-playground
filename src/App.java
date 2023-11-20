@@ -47,7 +47,11 @@ public class App {
             return;
         }
         assert phrases != null;
-
+        Resolver resolver = new Resolver(interpreter);
+        resolver.resolve(phrases);
+        if (hadError) {
+            return;
+        }
         interpreter.interpret(phrases);
     }
 
