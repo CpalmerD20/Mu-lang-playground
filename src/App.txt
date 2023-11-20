@@ -30,22 +30,18 @@ until       → 'until' EXPRESSION ';'
 block       → '{' DECLARATION '}'
 
 * Expressions *
-| lambda | join | match
-| assignment AKA mutation
-| or | and | equality
-| comparison | term
-| factor | unary
-| call | primary ;
+| lambda | join | match | assignment
+| or | and | equality | comparison
+| term| factor | unary | call | primary ;
 
-lambda      → 'each' '(' PARAMETERS* ')' { BODY } ';'
-            → '/>' PARAMETERS* '.' BODY ';'
-            → 'each' PARAMETERS* '/>' BODY ';'
+lambda      → 'each' '(' PARAMETERS* ')' 'return' BODY ';'
+            → 'each' '(" PARAMETERS* ')' '_>' BODY ';'
             ;
 join        → 'join' '(' STRING STRING... ')' ';'
             ;
 match       → //TODO
             ;
-mutation    → ?( call '.' )? IDENTIFIER '=' ASSIGNMENT | logic_or
+assignment  → ?( call '.' )? IDENTIFIER '=' ASSIGNMENT | logic_or //TODO change from Lox, don't want mutation on certain data structures
             ;
 logic_or    → logic_and ( 'or' logic_and )*
             ;

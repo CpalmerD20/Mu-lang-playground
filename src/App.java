@@ -12,13 +12,13 @@ public class App {
     static boolean hadInterpreterError = false;
     private static final Interpreter interpreter = new Interpreter();
     public static void main(String[] args) throws IOException {
-        AppRunWithTokens promptWithTokens = new AppRunWithTokens();
-//        runPrompt();
+//        AppRunWithTokens promptWithTokens = new AppRunWithTokens();
+        runPrompt();
         //TODO let is now mutable, add in guards to avoid mutating #
         //TODO implement join expression
-        //TODO implement visitUntil for repeat {}
-        //TODO implement return then lambda functions
-        //TODO implement ! operator
+        //TODO implement lambda expression
+        //TODO fully implement ! operator (!true), (!false);
+        //TODO currently allows programmer to do initialization and mutation with 'let'
 
 //        if (arguments.length > 1) {
 //            System.out.println("Using: mu-lox [script]");

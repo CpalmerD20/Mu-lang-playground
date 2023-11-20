@@ -23,6 +23,8 @@ public class Parser {
 //                return new Expression.Assign(name, value);
 //            }
             //TODO both let and # are Expression.Data at this point
+            //what is the difference between Exrpression.Variable and Expression.Data?
+
             if (e instanceof Expression.Data) {
                 Token name = ((Expression.Data)e).name;
                 return new Expression.Assign(name, value);
@@ -323,7 +325,7 @@ public class Parser {
             List<Statement> body = block(); //assumes left curly has already been matched
             return new Statement.Repeat(body);
         } finally {
-            loops -= 1;
+            loops += -1;
         }
 
     }

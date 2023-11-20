@@ -119,18 +119,14 @@ public class Lexer {
         //TODO find out what is wrong with string
         switch (glyph) {
 
-            case ' ' :
-                break;
-            case '\t' :
-                break;
-            case '\r' :
-                break;
+            case ' ', '\t', '\r':
+                return;
             case '\n' : line += 1;
-                break;
+                return;
             case ';' : addToken(Types.SEMICOLON);
-                break;
+                return;
             case '"' : handleString();
-                break;
+                return;
             case '(' : addToken(Types.L_PAREN);
                 break;
             case ')' : addToken(Types.R_PAREN);
@@ -147,21 +143,21 @@ public class Lexer {
                 break;
             case ',' : addToken(Types.COMMA);
                 break;
-            case '-' : addToken(Types.MINUS);
+            case '-' : addToken(advanceIf('>') ? Types.BIT_RIGHT : Types.MINUS);
                 break;
-            case '+' : addToken(Types.PLUS);
-                break;
-            case '%' : addToken(Types.MODULO);
+            case '+' : addToken(advanceIf('<') ? Types.BIT_LEFT : Types.PLUS);
                 break;
             case '.' : addToken(advanceIf('.') ? Types.RANGE : Types.DOT);
                 break;
             case '!' : addToken(advanceIf('=') ? Types.BANG_EQUAL : Types.BANG);
                 break;
-            case '/' : addToken(advanceIf('>') ? Types.MU : Types.SLASH);
+            case '/' : addToken(advanceIf('=') ? Types.DIVIDE_EQ : Types.SLASH);
                 break;
-            case '*' : addToken(advanceIf('^') ? Types.EXPONENT : Types.STAR);
+            case '*' : addToken(advanceIf('=') ? Types.TIMES_EQ : Types.STAR);
                 break;
             case '^' : addToken(advanceIf('*') ? Types.EXPONENT : Types.BIT_X0R);
+                break;
+            case '|' : addToken(Types.BIT_OR);
                 break;
             case '&' : addToken(advanceIf('*') ? Types.NOTE_IN : Types.BIT_AND);
                 break;
@@ -173,7 +169,9 @@ public class Lexer {
                 break;
             case '<' : addToken(advanceIf('=') ? Types.LESS_EQUAL : Types.LESS);
                 break;
-            case ':' : addToken(advanceIf(':') ? Types.DOUBLE_COLON : Types.COLON);
+            case ':' : addToken(advanceIf('=') ? Types.COLON_EQ : Types.COLON);
+                break;
+            case '%' : addToken(Types.MODULO);
                 break;
             default : {
                 if (isDigit(glyph)) {
