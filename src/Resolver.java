@@ -3,13 +3,17 @@ import java.util.List;
 import java.util.Stack;
 import java.util.Map;
 class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
+    private enum Function {
+        NONE, LAMBDA, INITIALIZER, CLOSURE
+    }
     private final Interpreter interpreter;
     private static final Stack<Map<String, Boolean>> scopes = new Stack<>();
+    private Function currentFunction = Function.NONE;
 
     Resolver(Interpreter scanner) {
         this.interpreter = scanner;
     }
-    private void resolve(List<Statement> list) {
+    void resolve(List<Statement> list) {
         for (Statement each : list) {
             resolve(each);
         }
@@ -28,7 +32,9 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
             }
         }
     }
-    private void resolveFunction(Statement.Closure function) {
+    private void resolveFunction(Statement.Closure function, Function type) {
+        Function enclosing = currentFunction;
+        currentFunction = type;
         addScope();
         for (Token parameter : function.parameters) {
             declare(parameter);
@@ -36,8 +42,11 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         }
         resolve(function.body);
         scopes.pop();
+        currentFunction = enclosing;
     }
-    private void resolveFunction(Statement.LambdaIn function) {
+    private void resolveFunction(Statement.LambdaIn function, Function type) {
+        Function enclosing = currentFunction;
+        currentFunction = type;
         addScope();
         for (Token parameter : function.parameters) {
             declare(parameter);
@@ -45,6 +54,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         }
         resolve(function.body);
         scopes.pop();
+        currentFunction = enclosing;
     }
 
     private void addScope() {
@@ -59,6 +69,9 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         if (scopes.isEmpty()) return;
 
         Map<String, Boolean> scope = scopes.peek();
+        if (scope.containsKey(token.lexeme)) {
+            Parser.error(token, "Variable already declared with this name in scope.");
+        }
         scope.put(token.lexeme, false);
     }
 
@@ -78,9 +91,10 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitClosure(Statement.Closure statement) {
+        //TODO see Void visitReturn to consider avoiding top level closure
         declare(statement.name);
         define(statement.name);
-        resolveFunction(statement);
+        resolveFunction(statement, Function.CLOSURE);
         return null;
     }
     @Override
@@ -116,11 +130,18 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitBinaryExpr(Expression.Binary expression) {
+        resolve(expression.left);
+        resolve(expression.right);
         return null;
     }
 
     @Override
     public Void visitCallExpr(Expression.Call expression) {
+        resolve(expression.called);
+
+        for (Expression each : expression.arguments) {
+            resolve(each);
+        }
         return null;
     }
 
@@ -131,6 +152,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitGroupingExpr(Expression.Grouping expression) {
+        resolve(expression.expression);
         return null;
     }
 
@@ -141,6 +163,8 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitLogicalExpr(Expression.Logical expression) {
+        resolve(expression.left);
+        resolve(expression.right);
         return null;
     }
 
@@ -156,6 +180,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitUnaryExpr(Expression.Unary expression) {
+        resolve(expression.right);
         return null;
     }
 
@@ -163,8 +188,6 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     public Void visitDataExpr(Expression.Data expression) {
         return null;
     }
-
-
 
     @Override
     public Void visitModel(Statement.Model statement) {
@@ -181,7 +204,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     public Void visitLambda(Statement.LambdaIn statement) {
         declare(statement.name);
         define(statement.name);
-        resolveFunction(statement);
+        resolveFunction(statement, Function.LAMBDA);
         return null;
     }
 
@@ -203,6 +226,10 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitReturn(Statement.Return statement) {
+        //TODO test using clause to prevent top level closures.
+        if (currentFunction == Function.NONE) {
+            Parser.error(statement.keyword, "Can't return from top-level code.");
+        }
         if (statement.value != null) {
             resolve(statement.value);
         }
@@ -211,7 +238,6 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitRepeat(Statement.Repeat statement) {
-//        resolve(statement.condition);
         resolve(statement.body);
         return null;
     }
