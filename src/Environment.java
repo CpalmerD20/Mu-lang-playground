@@ -22,16 +22,11 @@ public class Environment {
     void define(String name, Object value) {
         values.put(name, value);
     }
-    void defineData(String name, Object value) {
-        if (values.containsKey(name)) {
-            throw new RuntimeException("Data point has already been assigned: " + name);
-        }
-        values.put(name, value);
-    }
     void reassign(Token name, Object value) {
-        if (name.type != Types.VARIABLE) {
-            throw new InterpreterError(name, "can only reassign variables " + name.lexeme + " is not a variable.");
-        }
+//        if (name.type != Types.VARIABLE) {
+//            throw new InterpreterError(name, "can only reassign variables " + name.lexeme + " is not a variable.");
+//        }
+        //TODO add clause to only mutate variables
         if (values.containsKey(name.lexeme)) {
             values.put(name.lexeme, value);
             return;

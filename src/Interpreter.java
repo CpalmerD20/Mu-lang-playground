@@ -39,8 +39,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             report(error);
         }
     }
-    private void execute(Statement phrase) {
-        phrase.accept(this);
+    private void execute(Statement statement) {
+        statement.accept(this);
     }
 
     static void report(InterpreterError error) {
@@ -364,6 +364,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (statement.value != null) {
             value = evaluate(statement.value);
         }
+
         throw new Return(value);
     }
 
@@ -383,6 +384,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (statement.value != null) {
             value = evaluate(statement.value);
         }
+        //TODO revisit immutability
 //        environment.assignData(statement.name.lexeme, value);
         environment.define(statement.name.lexeme, value);
         //TODO fix once you get mutability figured out;
@@ -391,20 +393,21 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitRepeat(Statement.Repeat statement) {
-        while (true) {
-            for (Statement each : statement.body) {
-                execute(each);
+        while (true) for (Statement each : statement.body) {
+            if (each instanceof Statement.Until) {
+                if (isTruthy(evaluate(((Statement.Until) each).expression))) {
+                    return null;
+                }
             }
+            execute(each);
         }
     }
 
     @Override
     public Void visitUntil(Statement.Until statement) {
-        //TODO implement Until aka (break if true);
-        // almost works
-        if (isTruthy(statement.expression)) {
-            throw new Until();
-        }
         return null;
+    }
+
+    public void resolve(Expression expression, int i) {
     }
 }
