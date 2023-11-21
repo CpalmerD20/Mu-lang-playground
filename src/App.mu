@@ -73,3 +73,26 @@ define countTo(x) {
 }
 
 countTo(10);
+
+*********************** Planned Syntax ***********************
+
+// anonymous lambda functions
+
+# addTogether = each (x, y) return x + y;
+
+# addTwoSquares = each (x, y) {
+    # squareX = x ^* 2;
+    # squareY = x ^* 2;
+    return squareX + squareY;
+}
+
+addTogether(4, 6);    // 10
+addTwoSquares(3, 4);  // 25
+
+// string concatenation expressions
+
+# string = join "hello" " " "world!";
+
+# string = join {
+    "hello" " " "world!"
+};
