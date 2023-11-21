@@ -218,7 +218,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (parameters.size() != function.arity()) {
             throw new InterpreterError(expression.paren, "Expected " + function.arity() + " parameters but got " + parameters.size());
         }
-        System.out.println("Got Here" + called.toString()); //TODO how far do we get???
+        //TODO what happens to the lambda expression after this???
         return function.call(this, parameters);
     }
 

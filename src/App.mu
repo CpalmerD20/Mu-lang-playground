@@ -1,9 +1,12 @@
-
 print "Variable Assignment Test";
 let id = "Steve 7";
 print id;
 id = "Lucy 7";
 print id;
+
+print "Immutable assignment Test";
+# thisNumber = 22;
+print "One day this syntax will create immutable values.";
 
 print "Closure Test";
 
