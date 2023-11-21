@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Expression {
@@ -11,10 +12,32 @@ public abstract class Expression {
         R visitLiteralExpr(Literal expression);
         R visitLogicalExpr(Logical expression);
         R visitSetExpr(Set expression);
-        R visitSelfExpr(Self expression);
+        R visitJoinExpr(Join expression);
         R visitUnaryExpr(Unary expression);
         R visitDataExpr(Data expression);
         R visitVariableExpr(Variable Expression);
+        R visitLambda(LambdaFn expression);
+    }
+
+    public static class LambdaFn extends Expression {
+        final Token name;
+        final List<Token> parameters;
+        final List<Statement> body;
+        public LambdaFn(Token name, List<Token> parameters, List<Statement> body) {
+            this.name = name;
+            this.parameters = parameters;
+            this.body = body;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitLambda(this);
+        }
+
+        @Override
+        public String toString() {
+            return "" + name;
+        }
     }
 
     public static class Assign extends Expression {
@@ -68,7 +91,9 @@ public abstract class Expression {
         Expression object;
         Token name;
         public Get(Expression object, Token name) {
+
             this.object = object;
+            this.name = name;
         }
         <R> R accept(Visitor<R> guest) {
             return guest.visitGetExpr(this);
@@ -84,13 +109,13 @@ public abstract class Expression {
             return guest.visitUnaryExpr(this);
         }
     }
-    public static class Self extends Expression {
-        final Token keyword;
-        public Self(Token keyword) {
-            this.keyword = keyword;
+    public static class Join extends Expression {
+        final ArrayList<String> strings;
+        public Join(ArrayList<String> strings) {
+            this.strings = strings;
         }
         <R> R accept(Visitor<R> guest) {
-            return guest.visitSelfExpr(this);
+            return guest.visitJoinExpr(this);
         }
     }
     public static class Set extends Expression {

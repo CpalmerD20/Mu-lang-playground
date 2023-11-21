@@ -32,8 +32,6 @@ public class Lexer {
         keywords.put("stop", Types.STOP);
         keywords.put("return", Types.RETURN);
         keywords.put("let", Types.VARIABLE);
-        keywords.put("model", Types.MODEL);
-        keywords.put("self", Types.SELF);
         keywords.put("print", Types.PRINT);
         keywords.put("define", Types.CLOSURE);
         keywords.put("as", Types.AS);
@@ -161,7 +159,7 @@ public class Lexer {
                 break;
             case '&' : addToken(advanceIf('*') ? Types.NOTE_IN : Types.BIT_AND);
                 break;
-            case '~' : addToken(advanceIf('!') ? Types.COMMENT : Types.BIT_NOT);
+            case '~' : addToken(advanceIf('!') ? Types.NOTE_OUT : Types.BIT_NOT);
                 break;
             case '=' : addToken(advanceIf('=') ? Types.EQUAL_EQUAL : Types.EQUAL);
                 break;

@@ -9,7 +9,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     private final Map<Expression, Integer> locals = new HashMap<>(); //needed for closures
 
     Interpreter() {
-        //TODO rename clock(), change define to defineData();
         environment.define("clock", new MyCallable() {
             @Override
             public int arity() {
@@ -146,9 +145,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
             return isEqual(left, right);
         }
 
-
-        //TODO test if instanceof clauses work
-
         if (left instanceof Double || right instanceof Double) {
             switch (expression.operator.type) {
                 case EXPONENT:
@@ -180,38 +176,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
                     return (double) left <= (double) right;
             }
         }
-        if (left instanceof Long || right instanceof Long) {
-            switch (expression.operator.type) {
-                case EXPONENT :
-                    checkNumberOperands(expression.operator, left, right);
-                    return Math.pow((long) left, (long) right);
-                case SLASH :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left / (long) right;
-                case STAR :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left * (long) right;
-                case MINUS :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left - (long) right;
-                case PLUS :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left + (long) right;
-                case GREATER :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left > (long) right;
-                case GREATER_EQUAL :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left >= (long) right;
-                case LESS :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left < (long) right;
-                case LESS_EQUAL :
-                    checkNumberOperands(expression.operator, left, right);
-                    return (long) left <= (long) right;
-                default : throw new RuntimeException("Arithmetic Error");
-            }
-        }
         return null;
     }
     @Override
@@ -241,6 +205,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     @Override
     public Object visitCallExpr(Expression.Call expression) {
         Object called = evaluate(expression.called);
+
         if (!(called instanceof MyCallable)) {
             throw new InterpreterError(expression.paren, "Can only call functions, closures, and models.");
         }
@@ -253,26 +218,19 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (parameters.size() != function.arity()) {
             throw new InterpreterError(expression.paren, "Expected " + function.arity() + " parameters but got " + parameters.size());
         }
-
+        System.out.println("Got Here" + called.toString()); //TODO how far do we get???
         return function.call(this, parameters);
     }
 
     @Override
-    public Object visitGetExpr(Expression.Get expression) {
-        return null;
-    }
-
-
-
-
-
+    public Object visitGetExpr(Expression.Get expression) { return null; }
     @Override
     public Object visitSetExpr(Expression.Set expression) {
         return null;
     }
 
     @Override
-    public Object visitSelfExpr(Expression.Self expression) {
+    public Object visitJoinExpr(Expression.Join expression) {
         return null;
     }
 
@@ -315,30 +273,8 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Void visitModel(Statement.Model statement) {
-        return null;
-        //TODO implement
-    }
-
-    @Override
     public Void visitExpression(Statement.Expr statement) {
         evaluate(statement.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitLambda(Statement.LambdaIn statement) {
-        MyLambda lambda = new MyLambda(statement);
-        environment.define(statement.name.lexeme, lambda);
-        return null;
-        //TODO should be assignData()
-        //TODO test and implement anonymous
-    }
-
-    @Override
-    public Void visitClosure(Statement.Closure statement) {
-        MyClosure closure = new MyClosure(statement, environment);
-        environment.define(statement.name.lexeme, closure);
         return null;
     }
 
@@ -406,6 +342,20 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
     @Override
     public Void visitUntil(Statement.Until statement) {
+        return null;
+    }
+
+
+    @Override
+    public MyLambda visitLambda(Expression.LambdaFn anonymous) {
+        MyLambda lambda = new MyLambda(anonymous);
+        environment.define(anonymous.name.lexeme, lambda);
+        return lambda;
+    }
+    @Override
+    public Void visitClosure(Statement.Closure statement) {
+        MyClosure closure = new MyClosure(statement, environment);
+        environment.define(statement.name.lexeme, closure);
         return null;
     }
 

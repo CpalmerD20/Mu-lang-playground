@@ -3,9 +3,7 @@ public abstract class Statement {
     abstract <R> R accept(Visitor<R> visitor);
     interface Visitor<R> {
         R visitBlock(Block statement);
-        R visitModel(Model statement);
         R visitExpression(Expr statement);
-        R visitLambda(LambdaIn statement);
         R visitClosure(Closure statement);
         R visitIf(If statement);
         R visitPrint(Print statement);
@@ -26,21 +24,6 @@ public abstract class Statement {
         @Override
         <R> R accept(Visitor<R> visitor) {
             return visitor.visitBlock(this);
-        }
-    }
-
-    public static class Model extends Statement {
-        final Token name;
-        final List<Statement.Variable> properties;
-        final List<Statement.Closure> methods;
-        Model(Token name, List<Statement.Variable> properties, List<Statement.Closure> methods) {
-            this.name = name;
-            this.properties = properties;
-            this.methods = methods;
-        }
-        @Override
-        <R> R accept(Visitor<R> visitor) {
-            return visitor.visitModel(this);
         }
     }
 
@@ -66,20 +49,6 @@ public abstract class Statement {
         }
     }
 
-    public static class LambdaIn extends Statement {
-        final Token name;
-        final List<Token> parameters;
-        final List<Statement> body;
-
-        LambdaIn (Token name, List<Token> parameters, List<Statement> body) {
-            this.name = name;
-            this.parameters = parameters;
-            this.body = body;
-        }
-
-        @Override
-        <R> R accept(Visitor<R> guest) { return guest.visitLambda(this); }
-    }
     public static class Closure extends Statement {
         final Token name;
         final List<Token> parameters;
