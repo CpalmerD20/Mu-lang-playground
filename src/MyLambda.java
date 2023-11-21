@@ -1,26 +1,26 @@
 import java.util.List;
 
 public class MyLambda implements MyCallable {
-    private final Statement.LambdaIn declaration;
-    MyLambda(Statement.LambdaIn declaration) {
-        this.declaration = declaration;
+    private final Expression.LambdaFn expression;
+    MyLambda(Expression.LambdaFn expression) {
+        this.expression = expression;
     }
     @Override
     public int arity() {
-        return declaration.parameters.size();
+        return expression.parameters.size();
     }
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
         Environment scope = new Environment();
 //          should be able to have it's own environment, not globals
-        for (int i = 0; i < declaration.parameters.size(); i += 1) {
-            scope.define(declaration.parameters.get(i).lexeme, arguments.get(i));
+        for (int i = 0; i < expression.parameters.size(); i += 1) {
+            scope.define(expression.parameters.get(i).lexeme, arguments.get(i));
         }
-        interpreter.executeBlock(declaration.body, scope);
+        interpreter.executeBlock(expression.body, scope);
         return null;
     }
     @Override
     public String toString() {
-        return "::Lambda/Function named: " + declaration.name.lexeme + "::";
+        return "::Lambda/Function::";
     }
 }

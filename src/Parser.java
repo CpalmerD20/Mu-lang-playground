@@ -8,30 +8,152 @@ public class Parser {
         Parser.tokens = tokens;
         current = 0;
     }
+/* INITIAL PARSE **********************************************/
+    public static List<Statement> parse() {
+        List<Statement> declarations = new ArrayList<>();
+        try {
+            while (!isAtEnd()) {
+                Statement phrase = declaration();
+                declarations.add(phrase);
+            }
+            return declarations;
+        } catch (ParseError error) {
+            return null;
+        }
+    }
+    private static Statement declaration() {
+        try {
+            if (match(Types.VARIABLE)) {
+                return varDeclaration(); // let x ...
+            }
+            if (match(Types.DATA)) {
+                return dataDeclaration();
+                //TODO lambda 1
+            }
+            if (match(Types.CLOSURE)) {
+                return closure("closure"); // define x ...
+            }
+            return statement();
+        } catch (ParseError error) {
+            synchronize();
+            return null;
+        }
+    }
+/* DECLARATION DISTRIBUTORS **********************************************/
+    private static Statement varDeclaration() {
+        Token name = consume(Types.IDENTIFIER, "Expect variable name.");
+        Expression value = null;
+
+        if (match(Types.EQUAL)) {
+            value = expression();
+        }
+
+        consume(Types.SEMICOLON, "Expect ';' at end to declare variable.");
+        return new Statement.Variable(name, value);
+    }
+    private static Statement dataDeclaration() {
+        Token name = consume(Types.IDENTIFIER, "Expect data name.");
+        Expression value = null;
+        if (match(Types.EQUAL)) {
+            value = expression();
+            //TODO lambda 2;
+        }
+        consume(Types.SEMICOLON, "Expect ';' at end to declare data.");
+        return new Statement.Data(name, value);
+    }
+    private static Statement.Closure closure(String kind) {
+        Token name = consume(Types.IDENTIFIER, "Expect " + kind + " name.");
+
+        //TODO review to match closure spec
+        consume(Types.L_PAREN, "Expect '(' after " + kind + " name.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(Types.R_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                parameters.add(consume(Types.IDENTIFIER, "Expect parameter name."));
+            } while (match(Types.COMMA));
+        }
+        consume(Types.R_PAREN, "Expect ')' after parameters");
+        consume(Types.L_CURLY, "Expect '{' before " + kind + " body");
+        List<Statement> body = block(); //assumes left curly has already been matched
+        return new Statement.Closure(name, parameters, body);
+    }
+/* EXPRESSION EVALUATION **********************************************/
     private static Expression expression() {
         return assignment();
     }
     private static Expression assignment() {
-        Expression e = or();
+        Expression ex = or();
 
         if (match(Types.EQUAL)) {
             Token equals = previous();
             Expression value = assignment();
 
-//            if (e instanceof Expression.Variable) {
-//                Token name = ((Expression.Variable)e).name;
-//                return new Expression.Assign(name, value);
-//            }
-            //TODO both let and # are Expression.Data at this point
-            //what is the difference between Exrpression.Variable and Expression.Data?
-
-            if (e instanceof Expression.Data) {
-                Token name = ((Expression.Data)e).name;
+            if (ex instanceof Expression.Data) {
+                Token name = ((Expression.Data)ex).name;
                 return new Expression.Assign(name, value);
             }
+            //TODO was if this is Expression.Data can reassign both, if this is Expression.Variable can reassign both, why?
             error(equals, "Can only reassign to a declared variable. [ variables are declared with the 'let' keyword. ]");
         }
-        return e;
+        //TODO
+        if (match(Types.TIMES_EQ)) {
+            System.out.println("implement *=");
+        }
+        if (match(Types.DIVIDE_EQ)) {
+            System.out.println("implement /=");
+        }
+        if (match(Types.COLON_EQ)) {
+            System.out.println("implement :=");
+        }
+        return ex;
+    }
+
+    private static Expression.Join join() {
+        //TODO finish implementing
+        ArrayList<String> targets = new ArrayList<>();
+        if (!check(Types.L_CURLY)) {
+            consume(Types.L_CURLY, "Optional '{' to enclose expression.");
+            do {
+                if (targets.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                targets.add("" + previous().literal);
+                consume(Types.STRING, "Expect string.");
+            } while (!match(Types.R_CURLY));
+            consume(Types.R_CURLY, "If a join expression has '{' needs '}' to close.");
+        } else {
+            do {
+                if (targets.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                targets.add("" + previous().literal);
+                consume(Types.STRING, "Expect string.");
+            } while (match(Types.STRING) || match(Types.FLOAT));
+        }
+        return new Expression.Join(targets);
+    }
+
+    private static Expression.LambdaFn lambdaFn(Token lambda) {
+        //TODO review to match closure spec
+        // get here, but lambda ends up not being callable TEST return was Expression, now it's Expression.LambdaFn
+        System.out.println("in lambdaFn()");
+        consume(Types.L_PAREN, "Expect '(' after 'each'.");
+        List<Token> parameters = new ArrayList<>();
+        if (!check(Types.R_PAREN)) {
+            do {
+                if (parameters.size() >= 255) {
+                    error(peek(), "Can't have more than 255 parameters.");
+                }
+                parameters.add(consume(Types.IDENTIFIER, "Expect parameter name."));
+            } while (match(Types.COMMA));
+        }
+        consume(Types.R_PAREN, "Expect ')' after parameters");
+        consume(Types.L_CURLY, "Expect '{' before function body");
+        List<Statement> body = block(); //assumes left curly has already been matched
+        return new Expression.LambdaFn(lambda, parameters, body);
     }
     private static Expression or() {
         Expression exp = and();
@@ -126,16 +248,17 @@ public class Parser {
         while (true) {
             if (match(Types.L_PAREN)) {
                 exp = finishCall(exp);
-            } else {
-                break;
-            }
+            } else if (match(Types.DOT))  {
+                Token name = consume(Types.IDENTIFIER, "Expect '.' before object property.");
+                exp = new Expression.Get(exp, name);
+            } else break;
         }
         return exp;
     }
 
     private static Expression finishCall(Expression called) {
         List<Expression> parameters = new ArrayList<>();
-        //TODO make sure only function call needs ()
+        //TODO why do lambdas fail...
         if (!check(Types.R_PAREN)) {
             do {
                 if (parameters.size() >= 255) {
@@ -170,6 +293,9 @@ public class Parser {
         if (match(Types.FLOAT, Types.STRING)) {
             return new Expression.Literal(previous().literal);
         }
+        if (match(Types.LAMBDA)) { //TODO fix, here is our assignment problem
+            return lambdaFn(previous());
+        }
         if (match(Types.IDENTIFIER)) {
             return new Expression.Data(previous());
         }
@@ -178,8 +304,7 @@ public class Parser {
             consume(Types.R_PAREN, "expect ')' after expression");
             return new Expression.Grouping(e);
         }
-        throw shoutError(peek(), "Expect Expression");
-//        return null; //TODO REPLACE FOR LONGTERM
+        throw shoutError(peek(), "Expect Primary Expression (lambda, Identifier, True, False, Void, Float, String)");
     }
     private static Token consume(Types type, String message) {
         if (check(type)) {
@@ -197,76 +322,6 @@ public class Parser {
 
     private static class ParseError extends RuntimeException {}
 
-    public static List<Statement> parse() {
-        List<Statement> declarations = new ArrayList<>();
-        try {
-            while (!isAtEnd()) {
-                Statement phrase = declaration();
-                declarations.add(phrase);
-            }
-            return declarations;
-        } catch (ParseError error) {
-            return null;
-        }
-
-    }
-    private static Statement declaration() {
-        try {
-            if (match(Types.VARIABLE)) {
-                //TODO hash out mutable
-                return varDeclaration();
-            }
-            if (match(Types.DATA)) {
-                return dataDeclaration();
-            }
-            if (match(Types.CLOSURE)) {
-                return closure("closure");
-            }
-            return statement();
-        } catch (ParseError error) {
-            synchronize();
-            return null;
-        }
-    }
-    private static Statement closure(String kind) {
-        Token name = consume(Types.IDENTIFIER, "Expect " + kind + " name.");
-
-        //TODO review to match closure spec
-        consume(Types.L_PAREN, "Expect '(' after " + kind + " name.");
-        List<Token> parameters = new ArrayList<>();
-        if (!check(Types.R_PAREN)) {
-            do {
-                if (parameters.size() >= 255) {
-                    error(peek(), "Can't have more than 255 parameters.");
-                }
-                parameters.add(consume(Types.IDENTIFIER, "Expect parameter name."));
-            } while (match(Types.COMMA));
-        }
-        consume(Types.R_PAREN, "Expect ')' after parameters");
-        consume(Types.L_CURLY, "Expect '{' before " + kind + " body");
-        List<Statement> body = block(); //assumes left curly has already been matched
-        return new Statement.Closure(name, parameters, body);
-    }
-    private static Statement varDeclaration() {
-        Token name = consume(Types.IDENTIFIER, "Expect variable name.");
-        Expression value = null;
-
-        if (match(Types.EQUAL)) {
-            value = expression();
-        }
-
-        consume(Types.SEMICOLON, "Expect ';' at end to declare variable.");
-        return new Statement.Variable(name, value);
-    }
-    private static Statement dataDeclaration() {
-        Token name = consume(Types.IDENTIFIER, "Expect data name.");
-        Expression value = null;
-        if (match(Types.EQUAL)) {
-            value = expression();
-        }
-        consume(Types.SEMICOLON, "Expect ';' at end to declare data.");
-        return new Statement.Data(name, value);
-    }
     private static Statement statement() {
         if (match(Types.UNTIL)) {
             return untilStatement();
@@ -373,7 +428,6 @@ public class Parser {
             }
 
             switch (peek().type) {
-                case MODEL:
                 case CLOSURE:
                 case VARIABLE:
                 case DATA:

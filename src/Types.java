@@ -2,8 +2,8 @@
 //TODO add in integer types
 public enum Types {
     /* Literals. */
-    EOF, IDENTIFIER, STRING, FLOAT, COMMENT, NOTE_IN, NOTE_OUT,
-    //                                  ~!      ~!       !~
+    EOF, IDENTIFIER, STRING, FLOAT, NOTE_IN, NOTE_OUT,
+    //                                        note       ~!
     /* OPERATORS */
      L_PAREN, R_PAREN, L_CURLY, R_CURLY, L_BRACE, R_BRACE,
     //        ()                {}               []
@@ -20,9 +20,7 @@ public enum Types {
     // Keywords.
     LAMBDA, CLOSURE,
     //each   define
-    AND, OR, AS, IS, IF, ELSE, FALSE, TRUE,
-    REPEAT, UNTIL, SKIP, STOP, VOID, RETURN,
-    JOIN, MATCH, PRINT, VARIABLE, MODEL, SELF,
+    AND, OR, AS, IS, IF, ELSE, FALSE, TRUE, REPEAT, UNTIL, SKIP, STOP, VOID, RETURN, JOIN, MATCH, PRINT, VARIABLE,
 
 }
 

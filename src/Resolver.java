@@ -32,9 +32,9 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
             }
         }
     }
-    private void resolveFunction(Statement.Closure function, Function type) {
+    private void resolveFunction(Statement.Closure function) {
         Function enclosing = currentFunction;
-        currentFunction = type;
+        currentFunction = Function.CLOSURE;
         addScope();
         for (Token parameter : function.parameters) {
             declare(parameter);
@@ -44,9 +44,9 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         scopes.pop();
         currentFunction = enclosing;
     }
-    private void resolveFunction(Statement.LambdaIn function, Function type) {
+    private void resolveFunction(Expression.LambdaFn function) {
         Function enclosing = currentFunction;
-        currentFunction = type;
+        currentFunction = Function.LAMBDA;
         addScope();
         for (Token parameter : function.parameters) {
             declare(parameter);
@@ -94,7 +94,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         //TODO see Void visitReturn to consider avoiding top level closure
         declare(statement.name);
         define(statement.name);
-        resolveFunction(statement, Function.CLOSURE);
+        resolveFunction(statement);
         return null;
     }
     @Override
@@ -147,6 +147,8 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitGetExpr(Expression.Get expression) {
+
+        resolve(expression.object);
         return null;
     }
 
@@ -174,9 +176,11 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     }
 
     @Override
-    public Void visitSelfExpr(Expression.Self expression) {
+    public Void visitJoinExpr(Expression.Join expression) {
+        resolve(expression);
         return null;
     }
+
 
     @Override
     public Void visitUnaryExpr(Expression.Unary expression) {
@@ -190,21 +194,8 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     }
 
     @Override
-    public Void visitModel(Statement.Model statement) {
-        return null;
-    }
-
-    @Override
     public Void visitExpression(Statement.Expr statement) {
         resolve(statement.expression);
-        return null;
-    }
-
-    @Override
-    public Void visitLambda(Statement.LambdaIn statement) {
-        declare(statement.name);
-        define(statement.name);
-        resolveFunction(statement, Function.LAMBDA);
         return null;
     }
 
@@ -244,6 +235,15 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitUntil(Statement.Until statement) {
+        return null;
+    }
+
+
+    @Override
+    public Void visitLambda(Expression.LambdaFn expression) {
+        declare(expression.name);
+        define(expression.name);
+        resolveFunction(expression);
         return null;
     }
 }
