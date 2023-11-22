@@ -230,8 +230,17 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Object visitJoinExpr(Expression.Join expression) {
-        return null;
+    public String visitJoinExpr(Expression.Join expression) {
+//        String output = "" + expression.body.get(0);;
+//        int size = expression.body.size();
+//        int i = 1;
+//
+//        while (i < size) {
+//           output += expression.body.get(i);
+//           i += 1;
+//        }
+
+        return String.join("", expression.targets);
     }
 
     @Override
@@ -296,10 +305,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public Void visitReturn(Statement.Return statement) {
+    public Void visitReturn(Statement.Return expression) {
         Object value = null;
-        if (statement.value != null) {
-            value = evaluate(statement.value);
+        if (expression.value != null) {
+            value = evaluate(expression.value);
         }
 
         throw new Return(value);
@@ -321,10 +330,9 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (statement.value != null) {
             value = evaluate(statement.value);
         }
-        //TODO revisit immutability
 //        environment.assignData(statement.name.lexeme, value);
         environment.define(statement.name.lexeme, value);
-        //TODO fix once you get mutability figured out;
+        //TODO get to be immutable;
         return null;
     }
 

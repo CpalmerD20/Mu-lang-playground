@@ -7,11 +7,12 @@ public abstract class Statement {
         R visitClosure(Closure statement);
         R visitIf(If statement);
         R visitPrint(Print statement);
-        R visitReturn(Return statement);
+//        R visitReturn(Return statement);
         R visitVariable(Variable statement);
         R visitData(Data statement);
         R visitRepeat(Repeat statement);
         R visitUntil(Until statement);
+        R visitReturn(Return statement);
 
     }
 

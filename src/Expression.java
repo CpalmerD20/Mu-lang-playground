@@ -28,6 +28,13 @@ public abstract class Expression {
             this.parameters = parameters;
             this.body = body;
         }
+        public LambdaFn(Token name, List<Token> parameters, Statement action) {
+            this.name = name;
+            this.parameters = parameters;
+            ArrayList<Statement> body = new ArrayList<>();
+            body.add(action);
+            this.body = body;
+        }
 
         @Override
         <R> R accept(Visitor<R> guest) {
@@ -110,9 +117,9 @@ public abstract class Expression {
         }
     }
     public static class Join extends Expression {
-        final ArrayList<String> strings;
+        final ArrayList<String> targets;
         public Join(ArrayList<String> strings) {
-            this.strings = strings;
+            this.targets = strings;
         }
         <R> R accept(Visitor<R> guest) {
             return guest.visitJoinExpr(this);
