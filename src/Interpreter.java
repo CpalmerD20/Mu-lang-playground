@@ -230,16 +230,19 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
     }
 
     @Override
-    public String visitJoinExpr(Expression.Join expression) {
-//        String output = "" + expression.body.get(0);;
-//        int size = expression.body.size();
-//        int i = 1;
-//
-//        while (i < size) {
-//           output += expression.body.get(i);
-//           i += 1;
-//        }
+    public Object visitIfExpr(Expression.If expression) {
+        if (isTruthy(evaluate(expression.condition))) {
+            evaluate(expression.ifTrue);
+//            execute(expression.ifTrue.literal);
+        } else if (expression.ifFalse != null) {
+            evaluate(expression.ifFalse);
+//            execute(expression.ifFalse);
+        }
+        return null;
+    }
 
+    @Override
+    public String visitJoinExpr(Expression.Join expression) {
         return String.join("", expression.targets);
     }
 
@@ -355,10 +358,10 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
 
 
     @Override
-    public MyLambda visitLambda(Expression.LambdaFn anonymous) {
-        MyLambda lambda = new MyLambda(anonymous);
-        environment.define(anonymous.name.lexeme, lambda);
-        return lambda;
+    public Void visitLambda(Expression.LambdaFn expression) {
+        MyLambda lambda = new MyLambda(expression);
+        environment.define("lambda", lambda);
+        return null;
     }
     @Override
     public Void visitClosure(Statement.Closure statement) {

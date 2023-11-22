@@ -138,7 +138,7 @@ public class Parser {
         } while (match(Types.STRING) || match(Types.FLOAT));
     }
 
-    private static Expression.LambdaFn lambdaFn(Token lambda) {
+    private static Expression.LambdaFn lambdaFn() {
         //TODO probably an issue with the lazy return design.
         System.out.println("in lambdaFn()");
         consume(Types.L_PAREN, "Expect '(' after 'each'.");
@@ -155,10 +155,10 @@ public class Parser {
         if (check(Types.L_CURLY)) {
             consume(Types.L_CURLY, "Expect '{' before lambda body");
             List<Statement> body = block();
-            return new Expression.LambdaFn(lambda, parameters, body);
+            return new Expression.LambdaFn(parameters, body);
         } else {
             Statement body = statement(); //assumes left curly has already been matched
-            return new Expression.LambdaFn(lambda, parameters, body);
+            return new Expression.LambdaFn(parameters, body);
         }
     }
     private static Expression or() {
@@ -299,11 +299,14 @@ public class Parser {
         if (match(Types.FLOAT, Types.STRING)) {
             return new Expression.Literal(previous().literal);
         }
-        if (match(Types.LAMBDA)) { //TODO fix, here is our assignment problem
-            return lambdaFn(previous());
+        if (match(Types.LAMBDA)) {//TODO fix, here is our assignment problem
+            return lambdaFn();
         }
         if (match(Types.JOIN)) {
             return join();
+        }
+        if (match(Types.IF)) {
+            return ifExpression();
         }
         if (match(Types.IDENTIFIER)) {
             return new Expression.Data(previous());
@@ -315,6 +318,19 @@ public class Parser {
         }
         throw shoutError(peek(), "Expect Primary Expression (lambda, Identifier, True, False, Void, Float, String)");
     }
+
+    private static Expression ifExpression() {
+        Expression condition = expression();
+        consume(Types.L_CURLY, "Expect '{' to open then condition.");
+        Expression thenBranch = expression();
+        Expression elseBranch = null;
+        consume(Types.R_CURLY, "Expect '}' to close then condition.");
+        if (match(Types.ELSE)) {
+            elseBranch = expression();
+        }
+        return new Expression.If(condition, thenBranch, elseBranch);
+    }
+
     private static Token consume(Types type, String message) {
         if (check(type)) {
             return advance();

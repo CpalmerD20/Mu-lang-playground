@@ -12,6 +12,7 @@ public abstract class Expression {
         R visitLiteralExpr(Literal expression);
         R visitLogicalExpr(Logical expression);
         R visitSetExpr(Set expression);
+        R visitIfExpr(If expression);
         R visitJoinExpr(Join expression);
         R visitUnaryExpr(Unary expression);
         R visitDataExpr(Data expression);
@@ -20,22 +21,17 @@ public abstract class Expression {
     }
 
     public static class LambdaFn extends Expression {
-        final Token name;
         final List<Token> parameters;
         final List<Statement> body;
-        public LambdaFn(Token name, List<Token> parameters, List<Statement> body) {
-            this.name = name;
+        public LambdaFn(List<Token> parameters, List<Statement> body) {
             this.parameters = parameters;
             this.body = body;
         }
-        public LambdaFn(Token name, List<Token> parameters, Statement action) {
-            this.name = name;
+        public LambdaFn(List<Token> parameters, Statement body) {
             this.parameters = parameters;
-            ArrayList<Statement> body = new ArrayList<>();
-            body.add(action);
-            this.body = body;
+            this.body = new ArrayList<Statement>();
+            this.body.add(body);
         }
-
         @Override
         <R> R accept(Visitor<R> guest) {
             return guest.visitLambda(this);
@@ -43,7 +39,24 @@ public abstract class Expression {
 
         @Override
         public String toString() {
-            return "" + name;
+            return "anonymous";
+        }
+    }
+
+    public static class If extends Expression {
+        final Expression condition;
+        final Expression ifTrue; //TESTING IF THEY'RE JUST TOKENS
+        final Expression ifFalse;
+
+        If(Expression condition, Expression ifTrue, Expression ifFalse) {
+            this.condition = condition;
+            this.ifTrue = ifTrue;
+            this.ifFalse = ifFalse;
+        }
+
+        @Override
+        <R> R accept(Visitor<R> guest) {
+            return guest.visitIfExpr(this);
         }
     }
 
