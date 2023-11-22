@@ -60,14 +60,14 @@ let i = 0;
 repeat {
    i = i + 1;
    print i;
-   until i > 10;
+   until i >= 10;
 }
 
 print "Can you do it again?";
 define countTo(x) {
    let i = 0;
    repeat {
-       until i > x;
+       until i >= x;
        i = i + 1;
        print i;
    }
