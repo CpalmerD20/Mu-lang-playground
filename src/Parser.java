@@ -85,6 +85,9 @@ public class Parser {
         return assignment();
     }
     private static Expression assignment() {
+//        if (match(Types.RETURN)) {
+//            return returnStatement();
+//        }
         Expression ex = or();
 
         if (match(Types.EQUAL)) {
@@ -112,33 +115,31 @@ public class Parser {
     }
 
     private static Expression.Join join() {
-        //TODO finish implementing
         ArrayList<String> targets = new ArrayList<>();
-        if (!check(Types.L_CURLY)) {
+        if (check(Types.L_CURLY)) {
             consume(Types.L_CURLY, "Optional '{' to enclose expression.");
-            do {
-                if (targets.size() >= 255) {
-                    error(peek(), "Can't have more than 255 parameters.");
-                }
-                targets.add("" + previous().literal);
-                consume(Types.STRING, "Expect string.");
-            } while (!match(Types.R_CURLY));
+            joinHelper(targets);
             consume(Types.R_CURLY, "If a join expression has '{' needs '}' to close.");
         } else {
-            do {
-                if (targets.size() >= 255) {
-                    error(peek(), "Can't have more than 255 parameters.");
-                }
-                targets.add("" + previous().literal);
-                consume(Types.STRING, "Expect string.");
-            } while (match(Types.STRING) || match(Types.FLOAT));
+           joinHelper(targets);
         }
         return new Expression.Join(targets);
     }
+    private static void joinHelper(ArrayList<String> targets) {
+        do {
+            if (match(Types.SEMICOLON) || match(Types.R_CURLY)) {
+                --current;
+                break;
+            }
+            if (targets.size() >= 255) {
+                error(peek(), "Can't have more than 255 strings.");
+            }
+            targets.add("" + peek().literal);
+        } while (match(Types.STRING) || match(Types.FLOAT));
+    }
 
     private static Expression.LambdaFn lambdaFn(Token lambda) {
-        //TODO review to match closure spec
-        // get here, but lambda ends up not being callable TEST return was Expression, now it's Expression.LambdaFn
+        //TODO probably an issue with the lazy return design.
         System.out.println("in lambdaFn()");
         consume(Types.L_PAREN, "Expect '(' after 'each'.");
         List<Token> parameters = new ArrayList<>();
@@ -151,9 +152,14 @@ public class Parser {
             } while (match(Types.COMMA));
         }
         consume(Types.R_PAREN, "Expect ')' after parameters");
-        consume(Types.L_CURLY, "Expect '{' before function body");
-        List<Statement> body = block(); //assumes left curly has already been matched
-        return new Expression.LambdaFn(lambda, parameters, body);
+        if (check(Types.L_CURLY)) {
+            consume(Types.L_CURLY, "Expect '{' before lambda body");
+            List<Statement> body = block();
+            return new Expression.LambdaFn(lambda, parameters, body);
+        } else {
+            Statement body = statement(); //assumes left curly has already been matched
+            return new Expression.LambdaFn(lambda, parameters, body);
+        }
     }
     private static Expression or() {
         Expression exp = and();
@@ -296,6 +302,9 @@ public class Parser {
         if (match(Types.LAMBDA)) { //TODO fix, here is our assignment problem
             return lambdaFn(previous());
         }
+        if (match(Types.JOIN)) {
+            return join();
+        }
         if (match(Types.IDENTIFIER)) {
             return new Expression.Data(previous());
         }
@@ -354,7 +363,7 @@ public class Parser {
         return new Statement.Until(condition);
     }
 
-    private static Statement returnStatement() {
+    private static Statement.Return returnStatement() {
         Token keyword = previous();
         Expression value = null;
         if (!check(Types.SEMICOLON)) {
@@ -429,6 +438,7 @@ public class Parser {
 
             switch (peek().type) {
                 case CLOSURE:
+                case LAMBDA:
                 case VARIABLE:
                 case DATA:
                 case IF:

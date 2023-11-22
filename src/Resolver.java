@@ -216,13 +216,13 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     }
 
     @Override
-    public Void visitReturn(Statement.Return statement) {
+    public Void visitReturn(Statement.Return expression) {
         //TODO test using clause to prevent top level closures.
         if (currentFunction == Function.NONE) {
-            Parser.error(statement.keyword, "Can't return from top-level code.");
+            Parser.error(expression.keyword, "Can't return from top-level code.");
         }
-        if (statement.value != null) {
-            resolve(statement.value);
+        if (expression.value != null) {
+            resolve(expression.value);
         }
         return null;
     }

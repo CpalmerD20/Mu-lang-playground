@@ -16,19 +16,19 @@ public class App {
     private static final Interpreter interpreter = new Interpreter();
     public static void main(String[] args) throws IOException {
         byte[] bytes = new byte[0];
-        try {
-            bytes = Files.readAllBytes(Path.of("/src/App.mu"));
-        } catch (Exception e) {
-            var stackTrace = e.getStackTrace();
-            int end = stackTrace.length - 1;
-
-            System.out.println("---------------");
-            System.out.println("EXCEPTION: " + stackTrace[end].toString());
-            System.out.println("MESSAGE " + e.getMessage());
-            System.out.println(e.getClass());
-        } finally {
-            System.out.println("---------------");
-        }
+//        try {
+//            bytes = Files.readAllBytes(Path.of("/src/App.mu"));
+//        } catch (Exception e) {
+//            var stackTrace = e.getStackTrace();
+//            int end = stackTrace.length - 1;
+//
+//            System.out.println("---------------");
+//            System.out.println("EXCEPTION: " + stackTrace[end].toString());
+//            System.out.println("MESSAGE " + e.getMessage());
+//            System.out.println(e.getClass());
+//        } finally {
+//            System.out.println("---------------");
+//        }
 
         run(AppTest.CODE_SAMPLE);
 
