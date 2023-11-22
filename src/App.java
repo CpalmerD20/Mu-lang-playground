@@ -8,8 +8,8 @@ import java.util.List;
 
 public class App {
 
-    //TODO implement join expression
     //TODO finish implementing lambda expression, pesky bug when called.
+    // (naive implementation of a return statement is possibly the cause).
     //TODO implement ternary assignment (update if else)
     static boolean hadError = false;
     static boolean hadInterpreterError = false;
@@ -63,9 +63,9 @@ public class App {
         Parser parser = new Parser(tokens);
         List<Statement> phrases = Parser.parse();
 
-//        for (Token token : Parser.tokens) {
-//            System.out.print(token);
-//        }
+        for (Token token : Parser.tokens) {
+            System.out.print(token);
+        }
 
         if (hadError) {
             return;

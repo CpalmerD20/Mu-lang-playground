@@ -176,6 +176,16 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     }
 
     @Override
+    public Void visitIfExpr(Expression.If expression) {
+        resolve(expression.condition);
+//        resolve(expression.ifTrue);
+        if (expression.ifFalse != null) {
+            resolve(expression.ifFalse);
+        }
+        return null;
+    }
+
+    @Override
     public Void visitJoinExpr(Expression.Join expression) {
         resolve(expression);
         return null;
@@ -241,8 +251,6 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
 
     @Override
     public Void visitLambda(Expression.LambdaFn expression) {
-        declare(expression.name);
-        define(expression.name);
         resolveFunction(expression);
         return null;
     }
