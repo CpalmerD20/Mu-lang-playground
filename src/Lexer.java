@@ -182,11 +182,6 @@ public class Lexer {
             }
         }
     }
-
-    private void noOp() {
-    }
-
-    //TODO does not work
     private void handleString() {
         while (peek() != '"') {
             if(isAtEnd()) {
@@ -209,7 +204,6 @@ public class Lexer {
             scanToken();
         }
         tokens.add(new Token(Types.EOF, "", null, line));
-
         return tokens;
     }
 }

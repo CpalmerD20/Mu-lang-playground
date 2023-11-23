@@ -30,8 +30,8 @@ public class App {
 //            System.out.println("---------------");
 //        }
 
-        run(AppTest.CODE_SAMPLE);
-
+//        run(AppTest.CODE_SAMPLE);
+        System.out.print("*Mu Lang Test*");
         if (bytes.length > 0) {
             runFile(bytes);
         } else {
@@ -48,7 +48,7 @@ public class App {
         BufferedReader reader = new BufferedReader(input);
 
         for (;;) {
-            System.out.print("\n--> ");
+            System.out.print("\nEnter Code--> ");
             String line = reader.readLine();
             if (line == null) break;
             run(line);
@@ -63,9 +63,9 @@ public class App {
         Parser parser = new Parser(tokens);
         List<Statement> phrases = Parser.parse();
 
-        for (Token token : Parser.tokens) {
-            System.out.print(token);
-        }
+//        for (Token token : Parser.tokens) {
+//            System.out.print(token);
+//        }
 
         if (hadError) {
             return;

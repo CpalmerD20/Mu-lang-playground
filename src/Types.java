@@ -3,7 +3,7 @@
 public enum Types {
     /* Literals. */
     EOF, IDENTIFIER, STRING, FLOAT, NOTE_IN, NOTE_OUT,
-    //                                        note       ~!
+    //                               note       ~!
     /* OPERATORS */
      L_PAREN, R_PAREN, L_CURLY, R_CURLY, L_BRACE, R_BRACE,
     //        ()                {}               []
@@ -24,5 +24,3 @@ public enum Types {
     SWITCH, STOP, VOID, RETURN, JOIN, MATCH, PRINT, VARIABLE,
 
 }
-
-// YIELD, APPLY

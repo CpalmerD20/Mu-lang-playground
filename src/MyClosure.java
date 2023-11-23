@@ -4,9 +4,6 @@ public class MyClosure implements MyCallable {
     //environment(parent) ...closure
     private final Statement.Closure declaration; //TODO change to lamda or refactor class to closure
     private final Environment parent;
-/*
-    private final boolean isInitializer;
-*/
     MyClosure(Statement.Closure declaration, Environment parent) {
         this.declaration = declaration;
         this.parent = parent;
@@ -27,7 +24,6 @@ public class MyClosure implements MyCallable {
         } catch (Return object) {
             return object.value;
         }
-//        if (isInitializer) return parent.getAt(0, "this");
         return null;
     }
 

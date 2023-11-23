@@ -67,9 +67,9 @@ print "Can you do it again?";
 define countTo(x) {
    let i = 0;
    repeat {
-       until i >= x;
-       i = i + 1;
-       print i;
+      until i >= x;
+      i = i + 1;
+      print i;
    }
 }
 
