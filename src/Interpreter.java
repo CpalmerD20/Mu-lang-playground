@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Interpreter implements Expression.Visitor<Object>, Statement.Visitor<Void> {
-//    private final Environment globals = new Environment();
     private Environment environment = new Environment();
     private final Map<Expression, Integer> locals = new HashMap<>(); //needed for closures
 
@@ -93,13 +92,7 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         throw new InterpreterError(operator, "operand must be a number");
     }
 
-    //TODO add in join expressions
-    /*
-        if (left instanceof String || right instanceof String)
-        return "" + left + right;
-    */
     private boolean isTruthy(Object object) {
-        //TODO revisit empty sequences like Python? if object == 0 ?
         if (object == null) {
             return false;
         }
@@ -218,7 +211,6 @@ public class Interpreter implements Expression.Visitor<Object>, Statement.Visito
         if (parameters.size() != function.arity()) {
             throw new InterpreterError(expression.paren, "Expected " + function.arity() + " parameters but got " + parameters.size());
         }
-        //TODO what happens to the lambda expression after this???
         return function.call(this, parameters);
     }
 

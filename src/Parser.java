@@ -3,7 +3,7 @@ import java.util.List;
 public class Parser {
     public static List<Token> tokens;
     private static int current = 0;
-    private static int loops = 0; //not sure if needed, attempting to get 'until true' to work
+    private static int loops = 0; //helps manage 'until'
     public Parser(List<Token> tokens) {
         Parser.tokens = tokens;
         current = 0;
@@ -85,9 +85,6 @@ public class Parser {
         return assignment();
     }
     private static Expression assignment() {
-//        if (match(Types.RETURN)) {
-//            return returnStatement();
-//        }
         Expression ex = or();
 
         if (match(Types.EQUAL)) {
@@ -98,18 +95,17 @@ public class Parser {
                 Token name = ((Expression.Data)ex).name;
                 return new Expression.Assign(name, value);
             }
-            //TODO was if this is Expression.Data can reassign both, if this is Expression.Variable can reassign both, why?
             error(equals, "Can only reassign to a declared variable. [ variables are declared with the 'let' keyword. ]");
         }
         //TODO
         if (match(Types.TIMES_EQ)) {
-            System.out.println("implement *=");
+            System.out.println("not yet implemented *=");
         }
         if (match(Types.DIVIDE_EQ)) {
-            System.out.println("implement /=");
+            System.out.println("not yet implemented /=");
         }
         if (match(Types.COLON_EQ)) {
-            System.out.println("implement :=");
+            System.out.println("not yet implemented :=");
         }
         return ex;
     }
@@ -139,7 +135,7 @@ public class Parser {
     }
 
     private static Expression.LambdaFn lambdaFn() {
-        //TODO probably an issue with the lazy return design.
+        //TODO bug-fix probably an issue with the lazy return design.
         System.out.println("in lambdaFn()");
         consume(Types.L_PAREN, "Expect '(' after 'each'.");
         List<Token> parameters = new ArrayList<>();
@@ -264,7 +260,6 @@ public class Parser {
 
     private static Expression finishCall(Expression called) {
         List<Expression> parameters = new ArrayList<>();
-        //TODO why do lambdas fail...
         if (!check(Types.R_PAREN)) {
             do {
                 if (parameters.size() >= 255) {
@@ -294,19 +289,18 @@ public class Parser {
         }
         if (match(Types.VOID)) {
             return new Expression.Literal(null);
-            //TODO do we want null?
         }
         if (match(Types.FLOAT, Types.STRING)) {
             return new Expression.Literal(previous().literal);
         }
-        if (match(Types.LAMBDA)) {//TODO fix, here is our assignment problem
+        if (match(Types.LAMBDA)) {
             return lambdaFn();
         }
         if (match(Types.JOIN)) {
             return join();
         }
         if (match(Types.IF)) {
-            return ifExpression();
+            return ifExpression(); //TODO finish implementing
         }
         if (match(Types.IDENTIFIER)) {
             return new Expression.Data(previous());
@@ -411,7 +405,7 @@ public class Parser {
     }
 
     private static Statement ifStatement() {
-        //TODO enforce { } for else clause?
+        //TODO enforce { } for else clause? probably after implementing match/switch
         Expression condition = expression();
         consume(Types.L_CURLY, "Expect '{' to open then condition.");
         Statement thenBranch = statement();
@@ -444,14 +438,12 @@ public class Parser {
         return new Statement.Expr(expression);
     }
     private static void synchronize() {
-        //TODO make sure it works
         advance();
 
         while (!isAtEnd()) {
             if (previous().type == Types.SEMICOLON) {
                 return;
             }
-
             switch (peek().type) {
                 case CLOSURE:
                 case LAMBDA:

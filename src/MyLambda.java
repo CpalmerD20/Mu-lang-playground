@@ -12,7 +12,6 @@ public class MyLambda implements MyCallable {
     @Override
     public Object call(Interpreter interpreter, List<Object> arguments) {
         Environment scope = new Environment();
-//          should be able to have it's own environment, not globals
         for (int i = 0; i < expression.parameters.size(); i += 1) {
             scope.define(expression.parameters.get(i).lexeme, arguments.get(i));
         }

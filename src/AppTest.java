@@ -1,12 +1,12 @@
 public class AppTest {
     public static final String CODE_SAMPLE = """
-                print "Variable Assignment Test";
+                print "*Variable Assignment Test*";
                 let id = "Steve 7";
                 print id;
                 id = "Lucy 7";
                 print id;
                 
-                print "Closure Test";
+                print "*Closure Test*";
                 
                 define addTogether(x, y) { print x; return x + y; }
                 print addTogether(3, 5);
@@ -23,7 +23,7 @@ public class AppTest {
                 counter();
                 counter();
                 
-                print "Control Flow Test: if {} else {}";
+                print "*Control Flow Test: if {} else {}*";
                 if false {
                     print 0;
                 } else {
@@ -40,7 +40,7 @@ public class AppTest {
                     print 22;
                 } else print "dave";
                 
-                print "Control Flow Test: repeat statement";
+                print "*Control Flow Test: repeat statement*";
                 repeat {
                     print "dave ";
                     until true;
@@ -52,7 +52,7 @@ public class AppTest {
                     until true;
                 }
                 
-                print "Count to 10 please.";
+                print "*Count to 10 please.*";
                 let i = 0;
                 repeat {
                     i = i + 1;
@@ -60,7 +60,7 @@ public class AppTest {
                     until i >= 10;
                 }
                 
-                print "Can you do it again?";
+                print "*Can you do it again?*";
                 define countTo(x) {
                     let i = 0;
                     repeat {
@@ -72,7 +72,7 @@ public class AppTest {
                 
                 countTo(10);
                 
-                print "String Concatenation";
+                print "*String Concatenation*";
                         
                 # newString = join "Mary " "had " "a " "little " "lamb.";
                 print newString;

@@ -178,7 +178,7 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
     @Override
     public Void visitIfExpr(Expression.If expression) {
         resolve(expression.condition);
-//        resolve(expression.ifTrue);
+//        resolve(expression.ifTrue); TODO finish implementing
         if (expression.ifFalse != null) {
             resolve(expression.ifFalse);
         }
@@ -190,7 +190,6 @@ class Resolver implements Expression.Visitor<Void>, Statement.Visitor<Void> {
         resolve(expression);
         return null;
     }
-
 
     @Override
     public Void visitUnaryExpr(Expression.Unary expression) {
